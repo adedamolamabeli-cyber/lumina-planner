@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" data-color="rose">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Lumina Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --a:#C5606A;--al:#FDEEF0;--am:#E8959B;
+  --plum:#7A4F82;--pl:#F2EBF4;--pm:#B48DBB;
+  --sage:#3D7A60;--sl:#E5F2EC;--sm:#7DB89A;
+  --gold:#A8762E;--gl:#FBF3E2;--gm:#D4A84E;
+  --teal:#2D7A8A;--tl:#E3F2F5;--tm:#6DB8C8;
+  --coral:#C8614A;--cl:#FDEEE9;--cm:#E89A87;
+  --navy:#2C4A7A;--nl:#E5EBF5;--nm:#6B8DC0;
+  --sky:#2878B8;--skl:#E4F0FA;
+  --bg:#FDF8F4;--su:#FFFFFF;--s2:#FAF5F0;
+  --tx:#241A18;--t2:#6E5252;--t3:#A88E8E;
+  --bd:rgba(180,120,110,.12);--b2:rgba(180,120,110,.22);
+  --sh:0 2px 20px rgba(160,90,80,.07);--r:14px;
+}
+[data-color="plum"]{--a:var(--plum);--al:var(--pl);--am:var(--pm)}
+[data-color="teal"]{--a:var(--teal);--al:var(--tl);--am:var(--tm)}
+[data-color="sage"]{--a:var(--sage);--al:var(--sl);--am:var(--sm)}
+[data-color="navy"]{--a:var(--navy);--al:var(--nl);--am:var(--nm)}
+[data-theme="dark"]{
+  --bg:#1C1518;--su:#261C22;--s2:#301E28;
+  --tx:#F5EDE8;--t2:#C4A090;--t3:#8A6A60;
+  --bd:rgba(255,170,150,.1);--b2:rgba(255,170,150,.18);--sh:0 2px 20px rgba(0,0,0,.3);
+  --al:#2E1820;--pl:#231828;--sl:#182420;--gl:#231C10;--tl:#141E24;--cl:#2A1A14;--nl:#141A28;--skl:#141E2C;
+}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--tx);height:100vh;overflow:hidden;transition:background .3s,color .3s}
+.app{display:flex;flex-direction:column;height:100vh}
+/* ── SIDEBAR ── */
+.sidebar{position:fixed;top:0;left:0;height:100vh;width:240px;background:var(--su);border-right:1px solid var(--bd);z-index:1000;transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:4px 0 24px rgba(0,0,0,.12)}
+.sidebar.open{transform:translateX(0)}
+.sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:999;display:none;backdrop-filter:blur(2px)}
+.sidebar-overlay.on{display:block}
+.sidebar-hdr{padding:18px 16px 12px;border-bottom:1px solid var(--bd);flex-shrink:0}
+.sidebar-logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--a)}
+.sidebar-user{font-size:11px;color:var(--t3);margin-top:2px;font-weight:500}
+.sidebar-nav{flex:1;overflow-y:auto;padding:10px 8px}
+.sidebar-nav::-webkit-scrollbar{display:none}
+.sidebar-section-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--t3);padding:12px 10px 5px;display:block}
+.snb{display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border-radius:10px;border:none;background:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;color:var(--t2);transition:all .18s;text-align:left}
+.snb:hover{background:var(--s2);color:var(--tx)}
+.snb.on{color:#fff}
+.snb.on[data-t="home"]{background:var(--a)}
+.snb.on[data-t="planner"]{background:var(--a)}
+.snb.on[data-t="habits"]{background:var(--sage)}
+.snb.on[data-t="journal"]{background:var(--plum)}
+.snb.on[data-t="goals"]{background:var(--gold)}
+.snb.on[data-t="data"]{background:var(--navy)}
+.snb.on[data-t="reading"]{background:var(--teal)}
+.snb.on[data-t="gallery"]{background:var(--coral)}
+.snb.on[data-t="lessons"]{background:var(--sage)}
+.snb.on[data-t="prayer"]{background:var(--plum)}
+.snb.on[data-t="affirm"]{background:var(--plum)}
+.snb.on[data-t="vision"]{background:var(--gold)}
+.snb.on[data-t="shifts"]{background:var(--coral)}
+.snb.on[data-t="review"]{background:var(--coral)}
+.snb.on[data-t="health"]{background:var(--sky)}
+.snb.on[data-t="finance"]{background:var(--sage)}
+.snb.on[data-t="notes"]{background:var(--gold)}
+.snb-ic{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.sidebar-footer{padding:10px 8px 14px;border-top:1px solid var(--bd);display:flex;gap:6px;flex-wrap:wrap}
+.sfbtn{flex:1;min-width:calc(50% - 3px);padding:7px 4px;border-radius:8px;border:1px solid var(--bd);background:var(--s2);font-family:'Plus Jakarta Sans',sans-serif;font-size:10px;font-weight:700;cursor:pointer;color:var(--t2);transition:all .18s;display:flex;align-items:center;justify-content:center;gap:4px}
+.sfbtn:hover{background:var(--al);color:var(--a);border-color:var(--am)}
+
+/* ── SETUP SCREEN ── */
+#setup-screen{position:fixed;inset:0;z-index:99999;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+.setup-box{max-width:480px;width:100%;padding:36px 32px;background:var(--su);border-radius:24px;border:1px solid var(--bd);box-shadow:var(--sh)}
+.setup-logo{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:700;color:var(--a);text-align:center;margin-bottom:6px}
+.setup-tagline{font-size:13px;color:var(--t3);text-align:center;margin-bottom:28px}
+.setup-lbl{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:4px;margin-top:14px}
+.setup-in{width:100%;padding:10px 14px;border:1.5px solid var(--b2);border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:var(--tx);background:var(--s2);outline:none;transition:border-color .2s}
+.setup-in:focus{border-color:var(--a)}
+.setup-in::placeholder{color:var(--t3)}
+.color-pick-row{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}
+.cp{width:34px;height:34px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .2s;flex-shrink:0}
+.cp.on{border-color:var(--tx);transform:scale(1.15)}
+.setup-btn{width:100%;padding:14px;background:var(--a);color:#fff;border:none;border-radius:12px;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:22px;transition:opacity .2s}
+.setup-btn:hover{opacity:.88}
+.setup-roles{display:flex;gap:7px;flex-wrap:wrap;margin-top:6px}
+.role-btn{padding:7px 14px;border-radius:18px;border:1.5px solid var(--b2);background:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;color:var(--t3);transition:all .2s}
+.role-btn.on{color:#fff;border-color:transparent}
+
+/* ── HEADER ── */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:0 18px;height:56px;background:var(--su);border-bottom:1px solid var(--bd);flex-shrink:0;gap:8px}
+.logo{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--a);line-height:1}
+.logo-name{font-size:9.5px;color:var(--t3);font-weight:500;margin-top:1px}
+.hdr-mid{display:flex;align-items:center;gap:6px;flex:1;justify-content:center;overflow:hidden}
+.pill{font-size:11px;padding:4px 10px;border-radius:18px;border:1px solid var(--bd);font-weight:500;white-space:nowrap}
+.p-dt{background:var(--s2);color:var(--t2)}
+.p-sk{background:var(--gl);color:var(--gold);font-weight:700;border-color:var(--gm)}
+.p-rl{background:var(--tl);color:var(--teal);border-color:var(--tm);font-weight:600}
+.hdr-r{display:flex;gap:4px;flex-shrink:0}
+.ib{width:32px;height:32px;border-radius:50%;border:1px solid var(--b2);background:var(--s2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s}
+.ib:hover{background:var(--al)}
+
+/* ── NAV (legacy, unused — replaced by sidebar) ── */
+
+/* ── CONTENT ── */
+.content{flex:1;overflow-y:auto;padding:16px 18px;scroll-behavior:smooth}
+.content::-webkit-scrollbar{width:3px}
+.content::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
+.pane{display:none;animation:fu .2s ease}
+.pane.on{display:block}
+@keyframes fu{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── TYPE ── */
+.sttl{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;line-height:1.1;margin-bottom:3px}
+.ssub{font-size:12px;color:var(--t3);margin-bottom:14px}
+.lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--t3);margin:14px 0 7px}
+
+/* ── CARDS ── */
+.card{background:var(--su);border-radius:var(--r);padding:14px;border:1px solid var(--bd);box-shadow:var(--sh);margin-bottom:12px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:12px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.stat{background:var(--s2);border-radius:11px;padding:11px;border:1px solid var(--bd)}
+.stn{font-size:21px;font-weight:700;line-height:1}
+.stl{font-size:10px;color:var(--t3);margin-top:2px;font-weight:500}
+
+/* ── TASKS ── */
+.task{display:flex;align-items:center;gap:8px;padding:8px 11px;border-radius:9px;border:1px solid var(--bd);background:var(--s2);margin-bottom:5px;cursor:pointer;transition:all .15s}
+.task:hover{border-color:var(--am)}
+.task.done .ttx{text-decoration:line-through;color:var(--t3)}
+.chk{width:19px;height:19px;border-radius:50%;border:2px solid var(--a);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;font-size:10px;color:transparent}
+.task.done .chk{background:var(--a);border-color:var(--a);color:#fff}
+.ttx{font-size:13px;flex:1}
+.tg{font-size:10px;padding:2px 6px;border-radius:7px;font-weight:700;flex-shrink:0}
+.tg-s{background:var(--pl);color:var(--plum)}.tg-e{background:var(--al);color:var(--a)}
+.tg-c{background:var(--sl);color:var(--sage)}.tg-n{background:var(--cl);color:var(--coral)}
+.tg-d{background:var(--nl);color:var(--navy)}.tg-p{background:var(--gl);color:var(--gold)}
+.addin{width:100%;padding:7px 11px;border:1.5px dashed var(--b2);border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--tx);background:transparent;outline:none;margin-top:3px;transition:border-color .2s}
+.addin:focus{border-color:var(--a)}
+.addin::placeholder{color:var(--t3)}
+select.mini{padding:4px 7px;border-radius:6px;border:1px solid var(--b2);background:var(--s2);color:var(--tx);font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:600;outline:none;margin-top:3px;cursor:pointer}
+
+/* ── HABITS ── */
+.hrow{display:flex;align-items:center;gap:8px;padding:10px;border-radius:11px;border:1px solid var(--bd);background:var(--s2);margin-bottom:6px}
+.hic{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.hnm{font-size:12px;font-weight:600}
+.hct{font-size:10px;color:var(--t3);margin-top:1px}
+.hdots{display:flex;gap:3px}
+.hdot{width:21px;height:21px;border-radius:50%;border:1.5px solid var(--b2);cursor:pointer;background:var(--su);font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;color:var(--t3);transition:all .18s}
+.hdot.s{background:var(--plum);border-color:var(--plum);color:#fff}
+.hdot.e{background:var(--a);border-color:var(--a);color:#fff}
+.hdot.c{background:var(--sage);border-color:var(--sage);color:#fff}
+.hdot.n{background:var(--coral);border-color:var(--coral);color:#fff}
+.hdot.d{background:var(--navy);border-color:var(--navy);color:#fff}
+.hdot.h{background:var(--sky);border-color:var(--sky);color:#fff}
+.hstr{font-size:11px;font-weight:700;color:var(--gold);min-width:24px;text-align:right}
+.ghost{width:100%;padding:9px;border:1.5px dashed var(--b2);border-radius:11px;background:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:4px;transition:all .2s;font-weight:600}
+.ghost:hover{border-color:var(--a);color:var(--a)}
+
+/* ── MOOD ── */
+.mrow{display:flex;gap:5px;margin-bottom:11px}
+.mb{flex:1;padding:8px 2px;border-radius:11px;border:1.5px solid var(--bd);background:var(--s2);cursor:pointer;text-align:center;transition:all .18s;display:flex;flex-direction:column;align-items:center;gap:2px}
+.mb .ml{font-size:9px;color:var(--t3);font-weight:600;font-family:'Plus Jakarta Sans',sans-serif}
+.mb.sel{border-width:2px;transform:scale(1.05)}
+.mb.sel.m1{border-color:var(--navy);background:var(--nl)}.mb.sel.m2{border-color:var(--gold);background:var(--gl)}
+.mb.sel.m3{border-color:var(--sage);background:var(--sl)}.mb.sel.m4{border-color:var(--a);background:var(--al)}
+.mb.sel.m5{border-color:var(--plum);background:var(--pl)}
+
+/* ── JOURNAL ── */
+.jtb{padding:5px 11px;border-radius:15px;border:1px solid var(--b2);background:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;color:var(--t3);transition:all .18s}
+.jtb.on{background:var(--plum);color:#fff;border-color:var(--plum)}
+.jprompt{font-size:12px;color:var(--plum);font-weight:600;background:var(--pl);padding:9px 12px;border-radius:8px;border-left:3px solid var(--plum);margin-bottom:10px;line-height:1.6}
+.jarea{width:100%;min-height:130px;padding:11px;border:1px solid var(--b2);border-radius:11px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;line-height:1.85;color:var(--tx);background:var(--s2);resize:vertical;outline:none;transition:border-color .2s}
+.jarea:focus{border-color:var(--plum)}
+.sbtn{padding:8px 20px;border:none;border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-top:9px;transition:opacity .2s}
+.sbtn:hover{opacity:.85}
+.ecard{background:var(--s2);border:1px solid var(--bd);border-radius:11px;padding:11px;margin-bottom:7px;transition:border-color .2s;position:relative}
+.ecard:hover{border-color:var(--pm)}
+.emeta{font-size:10px;color:var(--t3);margin-bottom:4px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;font-weight:600}
+.eprev{font-size:12px;line-height:1.6;color:var(--t2)}
+
+/* ── GOALS ── */
+.gcard{background:var(--su);border:1px solid var(--bd);border-radius:15px;padding:15px;margin-bottom:11px;box-shadow:var(--sh);position:relative}
+.gttl{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:700;margin:5px 0 3px}
+.prog{height:7px;background:var(--s2);border-radius:10px;overflow:hidden;border:1px solid var(--bd)}
+.progf{height:100%;border-radius:10px;transition:width .5s}
+.pm2{display:flex;justify-content:space-between;font-size:10px;color:var(--t3);margin-top:3px;font-weight:600}
+.plbl{display:flex;justify-content:space-between;font-size:10px;color:var(--t3);margin-bottom:2px;font-weight:600}
+.ms{display:flex;align-items:center;gap:6px;font-size:12px;padding:5px 0;border-bottom:1px solid var(--bd)}
+.ms:last-child{border-bottom:none}
+.mschk{width:15px;height:15px;border-radius:4px;border:1.5px solid var(--b2);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:transparent;transition:all .18s}
+.mschk.on{color:#fff}
+.ms.dn .mstx{text-decoration:line-through;color:var(--t3)}
+.badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:7px}
+.cdel{position:absolute;top:12px;right:12px;width:22px;height:22px;border-radius:50%;border:none;background:var(--cl);color:var(--coral);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700}
+.ein{width:100%;padding:4px 7px;border:1px solid var(--b2);border-radius:6px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:var(--tx);background:var(--s2);outline:none;margin-bottom:3px;transition:border-color .2s}
+.ein:focus{border-color:var(--gold)}
+
+/* ── READING ── */
+.bcard{border:1px solid var(--bd);border-radius:15px;overflow:hidden;margin-bottom:11px;background:var(--su);box-shadow:var(--sh)}
+.bspine{height:4px}
+.bbody{padding:13px 15px}
+.brow{display:flex;align-items:flex-start;gap:11px}
+.bcovwrap{flex-shrink:0;position:relative}
+.bcov{width:46px;height:62px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:22px;overflow:hidden;cursor:pointer;border:2px dashed var(--b2);background:var(--s2)}
+.bcov img{width:100%;height:100%;object-fit:cover;border-radius:5px}
+.bcovhint{font-size:8px;color:var(--t3);text-align:center;margin-top:2px;font-weight:600}
+.bdelbtn{position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;background:var(--coral);border:none;color:#fff;font-size:9px;cursor:pointer;display:none;align-items:center;justify-content:center}
+.bcovwrap:hover .bdelbtn{display:flex}
+.rin{width:100%;padding:7px 9px;border:1px solid var(--bd);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:var(--tx);background:var(--s2);outline:none;resize:none;height:52px;margin-top:7px}
+.rin:focus{border-color:var(--teal)}
+.addbookbtn{width:100%;padding:12px;border:2px dashed var(--b2);border-radius:15px;background:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;font-weight:600}
+.addbookbtn:hover{border-color:var(--teal);color:var(--teal)}
+
+/* ── GALLERY ── */
+.ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:9px}
+.gitem{border-radius:11px;overflow:hidden;border:1px solid var(--bd);background:var(--s2);aspect-ratio:1;cursor:pointer;position:relative;transition:transform .18s}
+.gitem:hover{transform:scale(1.02)}
+.gitem img{width:100%;height:100%;object-fit:cover}
+.gdate{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.55));padding:13px 6px 5px;font-size:9px;color:#fff;font-weight:600}
+.gmood{position:absolute;top:5px;right:5px;font-size:14px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))}
+.gdel{position:absolute;top:5px;left:5px;width:18px;height:18px;border-radius:50%;background:rgba(200,97,74,.85);border:none;color:#fff;font-size:9px;cursor:pointer;display:none;align-items:center;justify-content:center}
+.gitem:hover .gdel{display:flex}
+.gupload{border-radius:11px;border:2px dashed var(--b2);background:var(--s2);aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;gap:5px}
+.gupload:hover{border-color:var(--coral)}
+.gupload input{display:none}
+
+/* ── GRATITUDE WALL ── */
+.gwall{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.gwitem{border-radius:12px;padding:13px;border:1px solid var(--bd);position:relative;transition:transform .18s}
+.gwitem:hover{transform:scale(1.01)}
+.gwdel{position:absolute;top:7px;right:7px;width:17px;height:17px;border-radius:50%;background:var(--cl);border:none;color:var(--coral);font-size:9px;cursor:pointer;display:none;align-items:center;justify-content:center;font-weight:700}
+.gwitem:hover .gwdel{display:flex}
+
+/* ── LESSONS / PRAYER ── */
+.wknav{display:flex;align-items:center;gap:7px;margin-bottom:14px}
+.wkbtn{width:28px;height:28px;border-radius:50%;border:1px solid var(--bd);background:var(--s2);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;color:var(--tx)}
+.wklbl{flex:1;text-align:center;font-weight:700;font-size:13px}
+.catrow{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px}
+.catbtn{padding:4px 10px;border-radius:15px;border:1px solid var(--b2);background:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;color:var(--t3);transition:all .18s}
+.catbtn.on{background:var(--sage);color:#fff;border-color:var(--sage)}
+.larea{width:100%;min-height:95px;padding:11px;border:1px solid var(--b2);border-radius:11px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;line-height:1.8;color:var(--tx);background:var(--s2);resize:vertical;outline:none;margin-bottom:7px}
+.larea:focus{border-color:var(--sage)}
+.lcard{background:var(--s2);border:1px solid var(--bd);border-radius:11px;padding:12px;margin-bottom:7px;position:relative}
+.lwk{font-size:10px;font-weight:700;color:var(--sage);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.lbody{font-size:12px;line-height:1.6;color:var(--t2)}
+.pverse{font-size:12px;font-style:italic;color:var(--t3);border-left:3px solid var(--pm);padding-left:10px;margin-bottom:16px;line-height:1.6}
+.psec{background:var(--su);border:1px solid var(--bd);border-radius:13px;padding:14px;margin-bottom:11px}
+.psttl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:9px}
+.pitem{display:flex;align-items:flex-start;gap:7px;padding:6px 0;border-bottom:1px solid var(--bd)}
+.pitem:last-of-type{border-bottom:none}
+.pchk{width:17px;height:17px;border-radius:50%;border:2px solid var(--pm);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;color:transparent;transition:all .18s;margin-top:1px}
+.pchk.on{background:var(--plum);border-color:var(--plum);color:#fff}
+.ptx{font-size:12px;line-height:1.5;flex:1;color:var(--t2)}
+.pdel{font-size:10px;color:var(--coral);cursor:pointer;font-weight:700;flex-shrink:0;padding:1px 5px;border-radius:4px;background:var(--cl);border:none}
+.prow{display:flex;gap:6px;margin-top:7px}
+.pin{flex:1;padding:7px 9px;border:1px solid var(--b2);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:var(--tx);background:var(--s2);outline:none}
+.pin:focus{border-color:var(--plum)}
+.padd{padding:7px 12px;border:none;background:var(--plum);color:#fff;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer}
+
+/* ── HEALTH (sleep + water + mood chart) ── */
+.ring-wrap{display:flex;flex-direction:column;align-items:center;margin-bottom:12px}
+.ring-svg{width:120px;height:120px}
+.ring-label{text-align:center;margin-top:6px}
+.water-btns{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.wbtn{width:40px;height:40px;border-radius:10px;border:1px solid var(--b2);background:var(--skl);color:var(--sky);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;transition:all .18s}
+.wbtn:hover{background:var(--sky);color:#fff}
+.wbtn.filled{background:var(--sky);color:#fff;border-color:var(--sky)}
+.mood-chart-bar{display:flex;align-items:flex-end;gap:4px;height:80px;margin-top:8px}
+.mcb{flex:1;border-radius:4px 4px 0 0;min-height:4px;transition:height .4s;cursor:default;position:relative}
+.mcb-lbl{position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--t3);font-weight:600;white-space:nowrap}
+
+/* ── FINANCE ── */
+.fin-goal{background:var(--s2);border:1px solid var(--bd);border-radius:11px;padding:12px;margin-bottom:8px;position:relative}
+.fin-name{font-size:13px;font-weight:600;margin-bottom:4px}
+.fin-meta{font-size:11px;color:var(--t3);margin-bottom:7px;font-weight:500}
+
+/* ── NOTES ── */
+.note-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:4px}
+.note-card{border-radius:12px;padding:14px;border:1px solid var(--bd);min-height:120px;position:relative;cursor:pointer;transition:transform .18s}
+.note-card:hover{transform:translateY(-2px)}
+.note-title{font-size:13px;font-weight:700;margin-bottom:5px}
+.note-body{font-size:12px;line-height:1.6;color:var(--t2)}
+.note-date{font-size:10px;color:var(--t3);margin-top:8px;font-weight:500}
+.ndel{position:absolute;top:8px;right:8px;width:18px;height:18px;border-radius:50%;border:none;background:var(--cl);color:var(--coral);font-size:10px;cursor:pointer;display:none;align-items:center;justify-content:center}
+.note-card:hover .ndel{display:flex}
+
+/* ── AFFIRMATIONS ── */
+.daff{background:linear-gradient(135deg,var(--pl),var(--al));border:1px solid var(--pm);border-radius:15px;padding:20px;text-align:center;margin-bottom:16px}
+.dafftx{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;line-height:1.5;color:var(--plum);margin-bottom:8px}
+.affcard{background:var(--su);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:9px;position:relative}
+.affnum{font-family:'Cormorant Garamond',serif;font-size:12px;color:var(--t3);font-weight:600;margin-bottom:4px}
+.afftx{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;line-height:1.5;color:var(--tx)}
+.affdel{position:absolute;top:10px;right:10px;width:20px;height:20px;border-radius:50%;border:none;background:var(--cl);color:var(--coral);font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+/* ── VISION ── */
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px}
+.vitem{border-radius:11px;overflow:hidden;aspect-ratio:3/4;position:relative;cursor:pointer;border:1px solid var(--bd);background:var(--s2)}
+.vitem img{width:100%;height:100%;object-fit:cover}
+.vcap{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.6));padding:14px 7px 6px;font-size:10px;color:#fff;font-weight:600}
+.vdel{position:absolute;top:5px;right:5px;width:18px;height:18px;border-radius:50%;background:rgba(200,97,74,.85);border:none;color:#fff;font-size:9px;cursor:pointer;display:none;align-items:center;justify-content:center}
+.vitem:hover .vdel{display:flex}
+.vupload{border-radius:11px;border:2px dashed var(--b2);background:var(--s2);aspect-ratio:3/4;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;gap:5px}
+.vupload:hover{border-color:var(--gold)}
+.vupload input{display:none}
+
+/* ── SHIFTS ── */
+.scard{background:var(--s2);border:1px solid var(--bd);border-radius:11px;padding:12px;margin-bottom:7px;position:relative}
+.sward{font-size:13px;font-weight:700;margin-bottom:2px}
+.smeta{font-size:10px;color:var(--t3);margin-bottom:5px;font-weight:500}
+.snotes{font-size:12px;color:var(--t2);line-height:1.5}
+
+/* ── REVIEW ── */
+.revnav{display:flex;align-items:center;gap:7px;margin-bottom:14px}
+.revbtn{width:28px;height:28px;border-radius:50%;border:1px solid var(--bd);background:var(--s2);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;color:var(--tx)}
+.revlbl{flex:1;text-align:center;font-weight:700;font-size:13px}
+.revsec{background:var(--su);border:1px solid var(--bd);border-radius:13px;padding:14px;margin-bottom:11px}
+.revsttl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:9px}
+
+/* ── HOME ── */
+.hgreet{background:linear-gradient(135deg,var(--al),var(--pl));border-radius:17px;padding:20px;margin-bottom:14px;border:1px solid var(--bd);position:relative;overflow:hidden}
+.hgreet::after{content:'✦';position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:52px;opacity:.08;font-family:'Cormorant Garamond',serif}
+.hgname{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:var(--a);line-height:1}
+.hgsub{font-size:12px;color:var(--t2);margin-top:3px}
+.hverse{background:var(--s2);border-left:3px solid var(--plum);border-radius:0 11px 11px 0;padding:11px 13px;margin-bottom:14px;font-size:12px;font-style:italic;color:var(--t2);line-height:1.65}
+.hquote{background:var(--su);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px;text-align:center}
+.hqtx{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;line-height:1.55;color:var(--tx);margin-bottom:5px}
+.hqau{font-size:10px;color:var(--t3);font-weight:600}
+.qkcard{background:var(--su);border:1px solid var(--bd);border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .18s;box-shadow:var(--sh)}
+.qkcard:hover{transform:translateY(-2px);box-shadow:0 5px 20px rgba(160,90,80,.12)}
+.qkic{font-size:20px;margin-bottom:5px}
+.qklb{font-size:10px;font-weight:700;color:var(--t2)}
+.cswatch{width:24px;height:24px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .18s;flex-shrink:0}
+.cswatch.on{border-color:var(--tx);transform:scale(1.15)}
+
+/* ── COUNTDOWN ── */
+.cdcard{background:linear-gradient(135deg,var(--al),var(--pl));border:1px solid var(--bd);border-radius:13px;padding:14px;margin-bottom:9px;position:relative}
+.cdnum{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:700;color:var(--a);line-height:1}
+.cdlbl{font-size:12px;font-weight:600;color:var(--t2);margin-top:2px}
+.cddate{font-size:10px;color:var(--t3);margin-top:1px;font-weight:500}
+
+/* ── MODAL ── */
+.modalbg{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;z-index:9999;padding:14px}
+.modalbg.on{display:flex}
+.modal{background:var(--su);border-radius:17px;max-width:420px;width:100%;padding:18px;position:relative;max-height:92vh;overflow-y:auto}
+.mclose{position:absolute;top:11px;right:11px;width:26px;height:26px;border-radius:50%;border:1px solid var(--bd);background:var(--s2);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;color:var(--tx)}
+.modal h3{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:700;margin-bottom:12px}
+.modal label{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;display:block;margin-bottom:3px;margin-top:9px}
+.modal input,.modal textarea,.modal select{width:100%;padding:7px 10px;border:1px solid var(--b2);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--tx);background:var(--s2);outline:none;transition:border-color .2s}
+.modal input:focus,.modal textarea:focus{border-color:var(--teal)}
+.modal textarea{resize:vertical;min-height:60px;line-height:1.7}
+.imguplbl{width:100%;padding:18px;border:2px dashed var(--b2);border-radius:9px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;margin-top:4px}
+.imguplbl:hover{border-color:var(--teal)}
+.imguplbl input{display:none}
+.imgprev{width:100%;height:100px;border-radius:8px;object-fit:cover;margin-top:6px;display:none}
+.msave{width:100%;padding:10px;border:none;border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-top:12px}
+.msave:hover{opacity:.88}
+.fbw{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+</style>
+</head>
+<body>
+
+<!-- ══ SETUP SCREEN ══ -->
+<div id="setup-screen">
+<div class="setup-box">
+  <div class="setup-logo">✦ Lumina</div>
+  <div class="setup-tagline">Your personal life planner — let's set it up for you</div>
+  <label class="setup-lbl">Your first name</label>
+  <input class="setup-in" id="su-name" placeholder="e.g. Adedamola">
+  <label class="setup-lbl">Name your planner</label>
+  <input class="setup-in" id="su-planner" placeholder="e.g. My Lumina, Mabel's Journal, LifeOS…">
+  <label class="setup-lbl">Your roles (select all that apply)</label>
+  <div class="setup-roles" id="su-roles">
+    <button class="role-btn" style="--rc:var(--coral)" onclick="toggleRole(this)">👩‍⚕️ Nurse</button>
+    <button class="role-btn" onclick="toggleRole(this)">📊 Data Scientist</button>
+    <button class="role-btn" onclick="toggleRole(this)">👩‍💻 Developer</button>
+    <button class="role-btn" onclick="toggleRole(this)">🎓 Student</button>
+    <button class="role-btn" onclick="toggleRole(this)">👩‍🏫 Educator</button>
+    <button class="role-btn" onclick="toggleRole(this)">💼 Business</button>
+    <button class="role-btn" onclick="toggleRole(this)">🎨 Creative</button>
+    <button class="role-btn" onclick="toggleRole(this)">🌿 Other</button>
+  </div>
+  <label class="setup-lbl">Pick your theme colour</label>
+  <div class="color-pick-row">
+    <div class="cp on" style="background:#C5606A" data-c="rose" onclick="pickSetupColor(this)" title="Rose"></div>
+    <div class="cp" style="background:#7A4F82" data-c="plum" onclick="pickSetupColor(this)" title="Plum"></div>
+    <div class="cp" style="background:#2D7A8A" data-c="teal" onclick="pickSetupColor(this)" title="Teal"></div>
+    <div class="cp" style="background:#3D7A60" data-c="sage" onclick="pickSetupColor(this)" title="Sage"></div>
+    <div class="cp" style="background:#2C4A7A" data-c="navy" onclick="pickSetupColor(this)" title="Navy"></div>
+  </div>
+  <label class="setup-lbl">Your verse or word for the year (optional)</label>
+  <input class="setup-in" id="su-verse" placeholder="e.g. Isaiah 43:19 — Behold, I am doing a new thing…">
+  <button class="setup-btn" onclick="completeSetup()">Open My Lumina ✦</button>
+</div>
+</div>
+
+<!-- ══ SIDEBAR ══ -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-hdr">
+    <div class="sidebar-logo">✦ <span id="sb-planner-name">Lumina</span></div>
+    <div class="sidebar-user" id="sb-username">—</div>
+  </div>
+  <div class="sidebar-nav">
+    <span class="sidebar-section-lbl">Home</span>
+    <button class="snb on" data-t="home"    onclick="sw('home',this);closeSidebar()"><span class="snb-ic">🏠</span>Home</button>
+
+    <span class="sidebar-section-lbl">Daily</span>
+    <button class="snb" data-t="planner"  onclick="sw('planner',this);closeSidebar()"><span class="snb-ic">📅</span>Planner</button>
+    <button class="snb" data-t="habits"   onclick="sw('habits',this);closeSidebar()"><span class="snb-ic">📊</span>Habits</button>
+    <button class="snb" data-t="journal"  onclick="sw('journal',this);closeSidebar()"><span class="snb-ic">✍️</span>Journal</button>
+    <button class="snb" data-t="health"   onclick="sw('health',this);closeSidebar()"><span class="snb-ic">💧</span>Health</button>
+
+    <span class="sidebar-section-lbl">Growth</span>
+    <button class="snb" data-t="goals"    onclick="sw('goals',this);closeSidebar()"><span class="snb-ic">🎯</span>Goals</button>
+    <button class="snb" data-t="reading"  onclick="sw('reading',this);closeSidebar()"><span class="snb-ic">📚</span>Reading</button>
+    <button class="snb" data-t="lessons"  onclick="sw('lessons',this);closeSidebar()"><span class="snb-ic">💡</span>Lessons</button>
+    <button class="snb" data-t="review"   onclick="sw('review',this);closeSidebar()"><span class="snb-ic">📋</span>Review</button>
+    <button class="snb" data-t="data"     onclick="sw('data',this);closeSidebar()"><span class="snb-ic">🔬</span>Data Science</button>
+
+    <span class="sidebar-section-lbl">Spirit & Mind</span>
+    <button class="snb" data-t="prayer"   onclick="sw('prayer',this);closeSidebar()"><span class="snb-ic">🙏</span>Prayer</button>
+    <button class="snb" data-t="affirm"   onclick="sw('affirm',this);closeSidebar()"><span class="snb-ic">💜</span>Affirmations</button>
+    <button class="snb" data-t="vision"   onclick="sw('vision',this);closeSidebar()"><span class="snb-ic">🌟</span>Vision Board</button>
+
+    <span class="sidebar-section-lbl">Life</span>
+    <button class="snb" data-t="finance"  onclick="sw('finance',this);closeSidebar()"><span class="snb-ic">💰</span>Finance</button>
+    <button class="snb" data-t="shifts"   onclick="sw('shifts',this);closeSidebar()"><span class="snb-ic">🏥</span>Shifts</button>
+    <button class="snb" data-t="gallery"  onclick="sw('gallery',this);closeSidebar()"><span class="snb-ic">🖼️</span>Gallery</button>
+    <button class="snb" data-t="notes"    onclick="sw('notes',this);closeSidebar()"><span class="snb-ic">📝</span>Notes</button>
+  </div>
+  <div class="sidebar-footer">
+    <button class="sfbtn" onclick="exportJSON()">⬇️ Export JSON</button>
+    <button class="sfbtn" onclick="exportCSV()">📄 Export CSV</button>
+    <button class="sfbtn" onclick="document.getElementById('import-file').click()">⬆️ Import</button>
+    <button class="sfbtn" onclick="toggleDark();closeSidebar()" id="dark-btn-sb">🌙 Dark</button>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importJSON(event)">
+  </div>
+</div>
+
+<!-- ══ MAIN APP ══ -->
+<div class="app" style="display:none" id="main-app">
+<header class="hdr">
+  <div style="display:flex;align-items:center;gap:10px">
+    <button class="ib" onclick="openSidebar()" style="font-size:18px;font-weight:700" title="Menu">☰</button>
+    <div><div class="logo" id="app-logo">✦ Lumina</div><div class="logo-name" id="app-username">—</div></div>
+  </div>
+  <div class="hdr-mid">
+    <span class="pill p-rl" id="app-roles">—</span>
+    <span class="pill p-dt" id="hdr-date">—</span>
+    <span class="pill p-sk">🔥 <span id="streak-n">0</span> days</span>
+  </div>
+  <div class="hdr-r">
+    <button class="ib" id="dark-btn" onclick="toggleDark()">🌙</button>
+    <button class="ib" onclick="if(confirm('Reset your setup?')){localStorage.removeItem('lumina_setup');location.reload()}" title="Reset setup">⚙️</button>
+  </div>
+</header>
+
+<nav class="nav" style="display:none"></nav>
+
+<main class="content">
+
+<!-- HOME -->
+<div class="pane on" id="p-home">
+  <div class="hgreet">
+    <div class="hgname">Good <span id="greet-time">day</span>, <span id="greet-name">Mabel</span> ✦</div>
+    <div class="hgsub" id="home-sub">—</div>
+    <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+      <span class="pill" style="background:rgba(255,255,255,.55);color:var(--a);border-color:var(--am);font-weight:700">🔥 <span id="home-sk">0</span> day streak</span>
+      <span class="pill" style="background:rgba(255,255,255,.55);color:var(--plum);border-color:var(--pm);font-weight:700" id="home-td">0 tasks done</span>
+    </div>
+  </div>
+  <div class="hverse" id="home-verse-box"><div id="hv-txt">…</div><div style="font-size:10px;font-weight:700;color:var(--plum);font-style:normal;margin-top:3px" id="hv-ref"></div></div>
+  <div style="display:flex;align-items:center;gap:7px;margin-bottom:12px;flex-wrap:wrap">
+    <span style="font-size:10px;font-weight:700;color:var(--t3)">Theme:</span>
+    <div class="cswatch on" style="background:#C5606A" onclick="setColor('rose',this)"></div>
+    <div class="cswatch" style="background:#7A4F82" onclick="setColor('plum',this)"></div>
+    <div class="cswatch" style="background:#2D7A8A" onclick="setColor('teal',this)"></div>
+    <div class="cswatch" style="background:#3D7A60" onclick="setColor('sage',this)"></div>
+    <div class="cswatch" style="background:#2C4A7A" onclick="setColor('navy',this)"></div>
+  </div>
+  <div class="hquote"><div class="hqtx" id="hq-txt">…</div><div class="hqau" id="hq-au"></div></div>
+  <div class="lbl" style="margin-top:0">Quick access</div>
+  <div class="g4">
+    <div class="qkcard" onclick="sw('planner',qk('planner'))"><div class="qkic">📅</div><div class="qklb">Planner</div></div>
+    <div class="qkcard" onclick="sw('journal',qk('journal'))"><div class="qkic">✍️</div><div class="qklb">Journal</div></div>
+    <div class="qkcard" onclick="sw('prayer',qk('prayer'))"><div class="qkic">🙏</div><div class="qklb">Prayer</div></div>
+    <div class="qkcard" onclick="sw('health',qk('health'))"><div class="qkic">💧</div><div class="qklb">Health</div></div>
+    <div class="qkcard" onclick="sw('goals',qk('goals'))"><div class="qkic">🎯</div><div class="qklb">Goals</div></div>
+    <div class="qkcard" onclick="sw('data',qk('data'))"><div class="qkic">🔬</div><div class="qklb">Data</div></div>
+    <div class="qkcard" onclick="sw('notes',qk('notes'))"><div class="qkic">📝</div><div class="qklb">Notes</div></div>
+    <div class="qkcard" onclick="sw('affirm',qk('affirm'))"><div class="qkic">💜</div><div class="qklb">Affirm</div></div>
+  </div>
+  <div class="lbl">Countdowns</div>
+  <div id="cd-list-home"></div>
+  <button class="ghost" onclick="openModal('cd-modal')">+ Add countdown</button>
+</div>
+
+<!-- PLANNER -->
+<div class="pane" id="p-planner">
+  <div class="fbw" style="margin-bottom:11px;align-items:flex-end">
+    <div><div class="sttl" style="color:var(--a)">Today's Plan</div><div class="ssub" id="planner-sub">Show up for yourself today ✦</div></div>
+    <div style="display:flex;gap:3px" id="day-btns"></div>
+  </div>
+  <div class="g3">
+    <div class="stat"><div class="stn" style="color:var(--a)" id="st-done">0</div><div class="stl">Completed</div></div>
+    <div class="stat"><div class="stn" style="color:var(--sage)" id="st-tot">0</div><div class="stl">Total</div></div>
+    <div class="stat"><div class="stn" style="color:var(--plum)" id="st-pct">0%</div><div class="stl">Done</div></div>
+  </div>
+  <div class="card">
+    <div class="lbl" style="margin-top:0">🌅 Morning</div><div id="tm"></div>
+    <select class="mini" id="tag-m"><option value="s">✝ Spiritual</option><option value="e">💜 Emotional</option><option value="c">🚀 Career</option><option value="n">🏥 Nursing</option><option value="d">📊 Data</option><option value="p">🌿 Personal</option></select>
+    <input class="addin" placeholder="+ Add morning task (Enter)…" onkeydown="addTask(event,'tm','tag-m')">
+    <div class="lbl">☀️ Afternoon</div><div id="ta"></div>
+    <select class="mini" id="tag-a"><option value="s">✝ Spiritual</option><option value="e">💜 Emotional</option><option value="c">🚀 Career</option><option value="n">🏥 Nursing</option><option value="d">📊 Data</option><option value="p">🌿 Personal</option></select>
+    <input class="addin" placeholder="+ Add afternoon task…" onkeydown="addTask(event,'ta','tag-a')">
+    <div class="lbl">🌙 Evening</div><div id="te"></div>
+    <select class="mini" id="tag-e"><option value="s">✝ Spiritual</option><option value="e">💜 Emotional</option><option value="c">🚀 Career</option><option value="n">🏥 Nursing</option><option value="d">📊 Data</option><option value="p">🌿 Personal</option></select>
+    <input class="addin" placeholder="+ Add evening task…" onkeydown="addTask(event,'te','tag-e')">
+  </div>
+</div>
+
+<!-- HABITS -->
+<div class="pane" id="p-habits">
+  <div class="sttl" style="color:var(--sage)">Habit Tracker</div><div class="ssub">Your disciplines build your destiny</div>
+  <div class="card" id="habits-card">
+    <div class="lbl" style="margin-top:0">✝ Spiritual</div>
+    <div class="hrow"><div class="hic" style="background:var(--pl)">✝️</div><div style="flex:1"><div class="hnm">Daily Bible reading</div><div class="hct">Spiritual · 15 min</div></div><div class="hdots" id="hd0"></div><div class="hstr">🔥5</div></div>
+    <div class="hrow"><div class="hic" style="background:var(--pl)">🙏</div><div style="flex:1"><div class="hnm">Morning prayer</div><div class="hct">Spiritual</div></div><div class="hdots" id="hd1"></div><div class="hstr">🔥7</div></div>
+    <div class="lbl">💜 Emotional</div>
+    <div class="hrow"><div class="hic" style="background:var(--al)">📓</div><div style="flex:1"><div class="hnm">Gratitude journaling</div><div class="hct">Emotional · 10 min</div></div><div class="hdots" id="hd2"></div><div class="hstr">🔥4</div></div>
+    <div class="hrow"><div class="hic" style="background:var(--al)">🧘</div><div style="flex:1"><div class="hnm">Mindfulness</div><div class="hct">Emotional · 10 min</div></div><div class="hdots" id="hd3"></div><div class="hstr">🔥3</div></div>
+    <div class="lbl">🏥 Nursing</div>
+    <div class="hrow"><div class="hic" style="background:var(--cl)">📋</div><div style="flex:1"><div class="hnm">CPD / clinical review</div><div class="hct">Nursing · 20 min</div></div><div class="hdots" id="hd4"></div><div class="hstr">🔥2</div></div>
+    <div class="lbl">📊 Data Science</div>
+    <div class="hrow"><div class="hic" style="background:var(--nl)">💻</div><div style="flex:1"><div class="hnm">Code / study session</div><div class="hct">Data Science · 30 min</div></div><div class="hdots" id="hd5"></div><div class="hstr">🔥6</div></div>
+    <div class="lbl">💧 Health</div>
+    <div class="hrow"><div class="hic" style="background:var(--skl)">💧</div><div style="flex:1"><div class="hnm">Drink 8 glasses water</div><div class="hct">Health · daily</div></div><div class="hdots" id="hd6"></div><div class="hstr">🔥3</div></div>
+    <div class="hrow"><div class="hic" style="background:var(--skl)">😴</div><div style="flex:1"><div class="hnm">Sleep 7–8 hours</div><div class="hct">Health · daily</div></div><div class="hdots" id="hd7"></div><div class="hstr">🔥4</div></div>
+    <div class="hrow"><div class="hic" style="background:var(--sl)">🏃</div><div style="flex:1"><div class="hnm">Exercise / movement</div><div class="hct">Personal · 30 min</div></div><div class="hdots" id="hd8"></div><div class="hstr">🔥5</div></div>
+    <button class="ghost">+ Add new habit</button>
+  </div>
+</div>
+
+<!-- JOURNAL -->
+<div class="pane" id="p-journal">
+  <div class="sttl" style="color:var(--plum)">My Journal</div><div class="ssub">Your safe, sacred space to feel and reflect</div>
+  <div style="display:flex;gap:6px;margin-bottom:14px">
+    <button class="jtb on" onclick="swJ(this,'jw')">Write</button>
+    <button class="jtb" onclick="swJ(this,'jp')">Past Entries</button>
+    <button class="jtb" onclick="swJ(this,'jg')">Gratitude Wall</button>
+  </div>
+  <div id="jw">
+    <div class="card" style="margin-bottom:10px">
+      <div class="lbl" style="margin-top:0">Today's mood</div>
+      <div class="mrow">
+        <button class="mb m1" onclick="pickMood(this,'😔','Struggling')"><span style="font-size:19px">😔</span><span class="ml">Struggling</span></button>
+        <button class="mb m2" onclick="pickMood(this,'😐','Neutral')"><span style="font-size:19px">😐</span><span class="ml">Neutral</span></button>
+        <button class="mb m3" onclick="pickMood(this,'🙂','Good')"><span style="font-size:19px">🙂</span><span class="ml">Good</span></button>
+        <button class="mb m4" onclick="pickMood(this,'😊','Great')"><span style="font-size:19px">😊</span><span class="ml">Great</span></button>
+        <button class="mb m5" onclick="pickMood(this,'🥰','Grateful')"><span style="font-size:19px">🥰</span><span class="ml">Grateful</span></button>
+      </div>
+    </div>
+    <div class="card">
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px" id="jtype-row">
+        <button class="jtb on" onclick="setJT(this,'Emotional','💭 What emotions showed up today? What do they need from you?')">💜 Emotional</button>
+        <button class="jtb" onclick="setJT(this,'Spiritual','✝ What did God speak to your heart today?')">✝ Spiritual</button>
+        <button class="jtb" onclick="setJT(this,'Career','🚀 What are you working towards professionally today?')">🚀 Career</button>
+        <button class="jtb" onclick="setJT(this,'Nursing','🏥 How was your shift? What stood out?')">🏥 Nursing</button>
+        <button class="jtb" onclick="setJT(this,'Data','📊 What did you build or learn today?')">📊 Data</button>
+        <button class="jtb" onclick="setJT(this,'General','🌿 Write freely — what is on your heart?')">🌿 General</button>
+      </div>
+      <div class="jprompt" id="j-prompt">💭 What emotions showed up today? What do they need from you?</div>
+      <textarea class="jarea" id="j-text" placeholder="Begin writing here… your thoughts are safe and sacred ✦"></textarea>
+      <button class="sbtn" style="background:var(--plum);color:#fff" onclick="saveEntry()">Save Entry ✦</button>
+    </div>
+  </div>
+  <div id="jp" style="display:none">
+    <input style="width:100%;padding:7px 11px;border:1px solid var(--b2);border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:var(--tx);background:var(--s2);outline:none;margin-bottom:10px" placeholder="🔍 Search entries…" oninput="renderEntries(this.value)" id="j-search">
+    <div id="j-list"></div>
+  </div>
+  <div id="jg" style="display:none">
+    <div class="card" style="margin-bottom:10px">
+      <select class="mini" id="gw-emoji" style="margin-bottom:7px;margin-top:0">
+        <option value="🌸">🌸</option><option value="✨">✨</option><option value="🙏">🙏</option><option value="💜">💜</option><option value="🌟">🌟</option><option value="🌿">🌿</option><option value="☀️">☀️</option><option value="🕊️">🕊️</option>
+      </select>
+      <textarea class="jarea" id="gw-txt" placeholder="What are you grateful for today?…" style="min-height:75px"></textarea>
+      <button class="sbtn" style="background:var(--sage);color:#fff" onclick="saveGwall()">Pin ✦</button>
+    </div>
+    <div class="gwall" id="gwall-grid"></div>
+  </div>
+</div>
+
+<!-- GOALS -->
+<div class="pane" id="p-goals">
+  <div class="sttl" style="color:var(--gold)">My Goals</div><div class="ssub">Every part of your life matters ✦</div>
+  <div id="goals-list"></div>
+  <button class="ghost" style="border-color:var(--gm);color:var(--gold)" onclick="openModal('goal-modal')">+ Add new goal</button>
+</div>
+
+<!-- DATA SCIENCE -->
+<div class="pane" id="p-data">
+  <div class="sttl" style="color:var(--navy)">Data Science Goals</div><div class="ssub">Where nursing meets data — your superpower ✦</div>
+  <div style="display:flex;align-items:center;gap:11px;padding:14px;background:var(--nl);border-radius:13px;border:1px solid var(--bd);margin-bottom:14px">
+    <div style="width:44px;height:44px;border-radius:11px;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🔬</div>
+    <div><div style="font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:700;color:var(--navy)">Nurse · Data Scientist in Progress</div><div style="font-size:11px;color:var(--t3);margin-top:1px">Bridging healthcare & data to save lives at scale</div></div>
+  </div>
+  <div id="ds-goals-list"></div>
+  <button class="ghost" style="border-color:var(--nm);color:var(--navy)" onclick="openModal('ds-modal')">+ Add data science goal</button>
+  <div class="card" style="margin-top:12px">
+    <div class="lbl" style="margin-top:0">📝 Weekly Study Log</div>
+    <textarea class="jarea" id="ds-log" style="min-height:90px" placeholder="Log topics, resources, code, breakthroughs…"></textarea>
+    <button class="sbtn" style="background:var(--navy);color:#fff" onclick="ss('ds_log',document.getElementById('ds-log').value);alert('Saved ✦')">Save ✦</button>
+  </div>
+</div>
+
+<!-- READING -->
+<div class="pane" id="p-reading">
+  <div class="sttl" style="color:var(--teal)">Reading List</div><div class="ssub" id="r-sub">Books · Bible · Data — this month</div>
+  <div id="books-container"></div>
+  <button class="addbookbtn" onclick="openModal('book-modal')">＋ Add a book or Bible passage</button>
+</div>
+
+<!-- GALLERY -->
+<div class="pane" id="p-gallery">
+  <div class="sttl" style="color:var(--coral)">Daily Gallery</div><div class="ssub">Moments + moods — your life in pictures</div>
+  <div class="ggrid" id="gal-grid">
+    <label class="gupload"><input type="file" accept="image/*" multiple onchange="handlePhotos(event)"><div style="font-size:24px">📷</div><div style="font-size:10px;color:var(--t3);font-weight:600;text-align:center">Add photo</div></label>
+  </div>
+</div>
+
+<!-- HEALTH -->
+<div class="pane" id="p-health">
+  <div class="sttl" style="color:var(--sky)">Health Tracker</div><div class="ssub">Sleep · Water · Mood — take care of you ✦</div>
+  <div class="g2">
+    <div class="card">
+      <div class="lbl" style="margin-top:0">😴 Sleep</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:11px;color:var(--t3);font-weight:600">Hours last night:</span>
+        <input type="number" id="sleep-in" min="0" max="24" step="0.5" placeholder="7.5" style="width:70px;padding:5px 8px;border:1px solid var(--b2);border-radius:7px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;color:var(--sky);background:var(--s2);outline:none">
+      </div>
+      <select id="sleep-qual" class="mini" style="margin-top:0;width:100%;margin-bottom:8px">
+        <option value="4">😴 Deep & restful</option><option value="3">🙂 Pretty good</option><option value="2">😐 Average</option><option value="1">😔 Restless</option>
+      </select>
+      <button class="sbtn" style="background:var(--sky);color:#fff;padding:7px 16px;font-size:12px" onclick="logSleep()">Log sleep</button>
+    </div>
+    <div class="card">
+      <div class="lbl" style="margin-top:0">💧 Water intake</div>
+      <div style="font-size:11px;color:var(--t3);margin-bottom:7px;font-weight:500">Tap each glass as you drink it</div>
+      <div class="water-btns" id="water-btns"></div>
+      <div style="font-size:12px;font-weight:700;color:var(--sky)" id="water-lbl">0 / 8 glasses</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="lbl" style="margin-top:0">📊 Mood chart — last 7 days</div>
+    <div class="mood-chart-bar" id="mood-chart"></div>
+    <div style="height:16px"></div>
+    <div style="display:flex;gap:10px;font-size:10px;color:var(--t3);margin-top:4px;flex-wrap:wrap">
+      <span>😔 1</span><span>😐 2</span><span>🙂 3</span><span>😊 4</span><span>🥰 5</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="lbl" style="margin-top:0">😴 Sleep log — last 7 entries</div>
+    <div id="sleep-list"></div>
+  </div>
+</div>
+
+<!-- FINANCE -->
+<div class="pane" id="p-finance">
+  <div class="sttl" style="color:var(--sage)">Financial Goals</div><div class="ssub">Build wealth with intention ✦</div>
+  <div class="g2">
+    <div class="stat"><div class="stn" style="color:var(--sage)" id="fin-saved">₦0</div><div class="stl">Total saved</div></div>
+    <div class="stat"><div class="stn" style="color:var(--gold)" id="fin-target">₦0</div><div class="stl">Total target</div></div>
+  </div>
+  <div id="fin-goals-list"></div>
+  <button class="ghost" style="border-color:var(--sm);color:var(--sage)" onclick="openModal('fin-modal')">+ Add financial goal</button>
+</div>
+
+<!-- NOTES -->
+<div class="pane" id="p-notes">
+  <div class="sttl" style="color:var(--gold)">Notes</div><div class="ssub">Ideas, thoughts, everything ✦</div>
+  <div class="card" style="margin-bottom:12px">
+    <input id="note-title-in" placeholder="Note title…" style="width:100%;padding:7px 10px;border:1px solid var(--b2);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;color:var(--tx);background:var(--s2);outline:none;margin-bottom:7px">
+    <textarea class="jarea" id="note-body-in" placeholder="Write your note here…" style="min-height:90px"></textarea>
+    <select class="mini" id="note-color" style="margin-top:5px;margin-bottom:0">
+      <option value="al">Rose</option><option value="pl">Plum</option><option value="sl">Sage</option><option value="gl">Gold</option><option value="tl">Teal</option><option value="nl">Navy</option>
+    </select>
+    <button class="sbtn" style="background:var(--gold);color:#fff;display:block;margin-top:8px" onclick="saveNote()">Save Note ✦</button>
+  </div>
+  <div class="note-grid" id="notes-grid"></div>
+</div>
+
+<!-- LESSONS -->
+<div class="pane" id="p-lessons">
+  <div class="sttl" style="color:var(--sage)">Lessons from the Week</div><div class="ssub">What life is teaching you ✦</div>
+  <div class="wknav"><button class="wkbtn" onclick="changeWeek(-1)">‹</button><div class="wklbl" id="wk-lbl">—</div><button class="wkbtn" onclick="changeWeek(1)">›</button></div>
+  <div class="card">
+    <div class="catrow"><button class="catbtn on" onclick="toggleCat(this)">🌱 Spiritual</button><button class="catbtn" onclick="toggleCat(this)">💜 Emotional</button><button class="catbtn" onclick="toggleCat(this)">🏥 Nursing</button><button class="catbtn" onclick="toggleCat(this)">📊 Data</button><button class="catbtn" onclick="toggleCat(this)">❤️ Relationships</button><button class="catbtn" onclick="toggleCat(this)">💡 General</button></div>
+    <textarea class="larea" id="l-text" placeholder="Write your lessons, revelations, insights…"></textarea>
+    <button class="sbtn" style="background:var(--sage);color:#fff" onclick="saveLesson()">Save ✦</button>
+  </div>
+  <div class="lbl">Previous weeks</div><div id="lessons-list"></div>
+</div>
+
+<!-- PRAYER -->
+<div class="pane" id="p-prayer">
+  <div class="sttl" style="color:var(--plum)" id="prayer-ttl">Prayer Journal</div>
+  <div class="pverse">"Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God." — Philippians 4:6</div>
+  <div class="psec"><div class="psttl" style="color:var(--plum)">🙏 This Month's Prayers</div><div id="prayers-list"></div><div class="prow"><input class="pin" id="pr-in" placeholder="Add a prayer request…" onkeydown="if(event.key==='Enter')addPrayer()"><button class="padd" onclick="addPrayer()">Add</button></div></div>
+  <div class="psec"><div class="psttl" style="color:var(--sage)">✅ Answered Prayers</div><div id="answered-list"></div></div>
+  <div class="psec"><div class="psttl" style="color:var(--gold)">📖 Scripture Focus</div><textarea class="jarea" id="scripture" placeholder="Your verse or declaration for this month…" style="min-height:75px"></textarea><button class="sbtn" style="background:var(--gold);color:#fff;margin-top:8px" onclick="ss('scripture',document.getElementById('scripture').value);alert('Saved ✦')">Save ✦</button></div>
+</div>
+
+<!-- AFFIRMATIONS -->
+<div class="pane" id="p-affirm">
+  <div class="sttl" style="color:var(--plum)">My Affirmations</div><div class="ssub">Words that shape who you are becoming ✦</div>
+  <div class="daff"><div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px">Today's affirmation</div><div class="dafftx" id="daff-txt">…</div><button class="sbtn" style="background:var(--plum);color:#fff;font-size:11px;padding:6px 14px;margin-top:0" onclick="nextAff()">Next ›</button></div>
+  <div class="card"><textarea class="jarea" id="aff-in" placeholder="Write a personal declaration over your life…" style="min-height:70px"></textarea><button class="sbtn" style="background:var(--plum);color:#fff" onclick="saveAff()">Add Affirmation ✦</button></div>
+  <div class="lbl">All affirmations</div><div id="aff-list"></div>
+</div>
+
+<!-- VISION -->
+<div class="pane" id="p-vision">
+  <div class="sttl" style="color:var(--gold)">Vision Board</div><div class="ssub">Write the vision, make it plain — Habakkuk 2:2</div>
+  <div class="vgrid" id="vision-grid">
+    <label class="vupload"><input type="file" accept="image/*" multiple onchange="handleVision(event)"><div style="font-size:22px">🌟</div><div style="font-size:10px;color:var(--t3);font-weight:600;text-align:center">Add vision</div></label>
+  </div>
+</div>
+
+<!-- SHIFTS -->
+<div class="pane" id="p-shifts">
+  <div class="sttl" style="color:var(--coral)">Shift Tracker</div><div class="ssub">Your nursing story, one shift at a time 👩‍⚕️</div>
+  <div class="g3">
+    <div class="stat"><div class="stn" style="color:var(--coral)" id="sh-count">0</div><div class="stl">Shifts logged</div></div>
+    <div class="stat"><div class="stn" style="color:var(--navy)" id="sh-hours">0</div><div class="stl">Hours total</div></div>
+    <div class="stat"><div class="stn" style="color:var(--sage)" id="sh-month">0</div><div class="stl">This month</div></div>
+  </div>
+  <div class="card">
+    <div class="lbl" style="margin-top:0">Log new shift</div>
+    <label style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;display:block;margin-bottom:3px">Date</label>
+    <input type="date" id="sh-date" style="width:100%;padding:7px 10px;border:1px solid var(--b2);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--tx);background:var(--s2);outline:none;margin-bottom:7px">
+    <label style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;display:block;margin-bottom:3px">Ward / department</label>
+    <input type="text" id="sh-ward" placeholder="e.g. ICU, Medical Ward, A&E…" style="width:100%;padding:7px 10px;border:1px solid var(--b2);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--tx);background:var(--s2);outline:none;margin-bottom:7px">
+    <div class="g2" style="margin-bottom:7px">
+      <div><label style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;display:block;margin-bottom:3px">Hours</label><input type="number" id="sh-hrs" placeholder="12" min="1" max="24" style="width:100%;padding:7px 10px;border:1px solid var(--b2);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--tx);background:var(--s2);outline:none"></div>
+      <div><label style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;display:block;margin-bottom:3px">Type</label><select id="sh-type" style="width:100%;padding:7px 10px;border:1px solid var(--b2);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--tx);background:var(--s2);outline:none"><option>Day shift</option><option>Night shift</option><option>Long day</option><option>On-call</option><option>Training</option></select></div>
+    </div>
+    <label style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;display:block;margin-bottom:3px">Notes</label>
+    <textarea id="sh-notes" placeholder="Patient moments, learnings, reflections…" style="width:100%;padding:7px 10px;border:1px solid var(--b2);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--tx);background:var(--s2);outline:none;resize:vertical;min-height:70px;line-height:1.7"></textarea>
+    <button class="sbtn" style="background:var(--coral);color:#fff;margin-top:8px" onclick="logShift()">Log Shift ✦</button>
+  </div>
+  <div class="lbl">Shift history</div><div id="shifts-list"></div>
+</div>
+
+<!-- REVIEW -->
+<div class="pane" id="p-review">
+  <div class="sttl" style="color:var(--coral)">Monthly Review</div><div class="ssub">Reflect, celebrate and set intentions ✦</div>
+  <div class="revnav"><button class="revbtn" onclick="changeMonth(-1)">‹</button><div class="revlbl" id="rev-lbl">—</div><button class="revbtn" onclick="changeMonth(1)">›</button></div>
+  <div class="revsec"><div class="revsttl" style="color:var(--sage)">🏆 Wins & Highlights</div><textarea class="jarea" id="rv-wins" style="min-height:80px" placeholder="What went well? Every win counts…"></textarea><button class="sbtn" style="background:var(--sage);color:#fff" onclick="saveRv('wins')">Save ✦</button></div>
+  <div class="revsec"><div class="revsttl" style="color:var(--coral)">🌊 Challenges & Struggles</div><textarea class="jarea" id="rv-str" style="min-height:80px" placeholder="What was hard? How did you show up anyway?…"></textarea><button class="sbtn" style="background:var(--coral);color:#fff" onclick="saveRv('str')">Save ✦</button></div>
+  <div class="revsec"><div class="revsttl" style="color:var(--plum)">💡 Key Lessons</div><textarea class="jarea" id="rv-les" style="min-height:80px" placeholder="What did this month teach you?…"></textarea><button class="sbtn" style="background:var(--plum);color:#fff" onclick="saveRv('les')">Save ✦</button></div>
+  <div class="revsec"><div class="revsttl" style="color:var(--gold)">🌟 Intentions for Next Month</div><textarea class="jarea" id="rv-int" style="min-height:80px" placeholder="What do you want to feel, build or pursue?…"></textarea><button class="sbtn" style="background:var(--gold);color:#fff" onclick="saveRv('int')">Save ✦</button></div>
+</div>
+
+</main>
+</div>
+
+<!-- MODALS -->
+<div class="modalbg" id="book-modal" onclick="if(event.target===this)closeModal('book-modal')"><div class="modal"><button class="mclose" onclick="closeModal('book-modal')">✕</button><h3 style="color:var(--teal)">📚 Add a Book</h3><label>Title</label><input id="bm-t" placeholder="e.g. The Book of John"><label>Author</label><input id="bm-a" placeholder="e.g. James Clear"><label>Type</label><select id="bm-tp"><option value="bible">✝ Bible</option><option value="data">📊 Data Science</option><option value="growth">🌱 Personal Growth</option><option value="nursing">🏥 Nursing</option><option value="fiction">📖 Fiction</option><option value="other">📘 Other</option></select><label>Current page / chapter</label><input id="bm-c" type="number" placeholder="0" min="0"><label>Total pages / chapters</label><input id="bm-tot" type="number" placeholder="100" min="1"><label>Cover image (optional)</label><label class="imguplbl"><input type="file" accept="image/*" onchange="prevCover(event)"><div style="font-size:20px">🖼️</div><div style="font-size:11px;color:var(--t3);font-weight:600">Tap to upload</div></label><img class="imgprev" id="cov-prev"><label>Notes</label><textarea id="bm-n" placeholder="What are you learning?"></textarea><button class="msave" style="background:var(--teal);color:#fff" onclick="saveBook()">Add ✦</button></div></div>
+
+<div class="modalbg" id="goal-modal" onclick="if(event.target===this)closeModal('goal-modal')"><div class="modal"><button class="mclose" onclick="closeModal('goal-modal')">✕</button><h3 style="color:var(--gold)">🎯 Add a Goal</h3><label>Category</label><select id="gm-c"><option value="spiritual">✝ Spiritual</option><option value="emotional">💜 Emotional</option><option value="career">🚀 Career</option><option value="nursing">🏥 Nursing</option><option value="data">📊 Data</option><option value="personal">🌿 Personal</option></select><label>Title</label><input id="gm-t" placeholder="e.g. Read the New Testament"><label>Description</label><textarea id="gm-d" placeholder="What does achieving this look like?"></textarea><label>Deadline</label><input id="gm-dl" placeholder="e.g. December 2026"><label>Milestones (one per line)</label><textarea id="gm-m" placeholder="Step 1&#10;Step 2"></textarea><label>Starting progress %</label><input id="gm-p" type="number" placeholder="0" min="0" max="100"><button class="msave" style="background:var(--gold);color:#fff" onclick="saveGoal()">Add Goal ✦</button></div></div>
+
+<div class="modalbg" id="ds-modal" onclick="if(event.target===this)closeModal('ds-modal')"><div class="modal"><button class="mclose" onclick="closeModal('ds-modal')">✕</button><h3 style="color:var(--navy)">🔬 Add DS Goal</h3><label>Area</label><select id="dm-a"><option>Python & Analytics</option><option>Machine Learning</option><option>SQL & Databases</option><option>Data Visualisation</option><option>Statistics</option><option>Portfolio Project</option><option>Other</option></select><label>Title</label><input id="dm-t" placeholder="e.g. Master Pandas"><label>Description</label><textarea id="dm-d" placeholder="What will you build or learn?"></textarea><label>Skills (comma-separated)</label><input id="dm-s" placeholder="Python, Pandas, Scikit-learn"><label>Deadline</label><input id="dm-dl" placeholder="e.g. Q3 2026"><label>Milestones (one per line)</label><textarea id="dm-m" placeholder="Step 1&#10;Step 2"></textarea><button class="msave" style="background:var(--navy);color:#fff" onclick="saveDSGoal()">Add Goal ✦</button></div></div>
+
+<div class="modalbg" id="fin-modal" onclick="if(event.target===this)closeModal('fin-modal')"><div class="modal"><button class="mclose" onclick="closeModal('fin-modal')">✕</button><h3 style="color:var(--sage)">💰 Add Financial Goal</h3><label>Goal name</label><input id="fm-n" placeholder="e.g. Emergency fund, New laptop…"><label>Target amount</label><input id="fm-t" type="number" placeholder="e.g. 500000" min="0"><label>Amount saved so far</label><input id="fm-s" type="number" placeholder="0" min="0"><label>Currency</label><select id="fm-cur"><option>₦</option><option>$</option><option>£</option><option>€</option></select><label>Deadline</label><input id="fm-dl" placeholder="e.g. December 2026"><button class="msave" style="background:var(--sage);color:#fff" onclick="saveFinGoal()">Add Goal ✦</button></div></div>
+
+<div class="modalbg" id="cd-modal" onclick="if(event.target===this)closeModal('cd-modal')"><div class="modal"><button class="mclose" onclick="closeModal('cd-modal')">✕</button><h3 style="color:var(--a)">⏳ Add Countdown</h3><label>Event name</label><input id="cd-n" placeholder="e.g. My birthday, Exam day, Holiday…"><label>Date</label><input id="cd-d" type="date"><button class="msave" style="background:var(--a);color:#fff" onclick="saveCountdown()">Add ✦</button></div></div>
+
+<div class="modalbg" id="vision-modal" onclick="if(event.target===this)closeModal('vision-modal')"><div class="modal"><button class="mclose" onclick="closeModal('vision-modal')">✕</button><img style="width:100%;border-radius:10px;max-height:220px;object-fit:cover;margin-bottom:11px" id="vm-img" src="" alt=""><label>Caption for this vision</label><input id="vm-cap" placeholder="e.g. My dream role, my healed body…"><button class="msave" style="background:var(--gold);color:#fff" onclick="saveVision()">Pin to Vision Board ✦</button></div></div>
+
+<div class="modalbg" id="gal-modal" onclick="if(event.target===this)closeModal('gal-modal')"><div class="modal"><button class="mclose" onclick="closeModal('gal-modal')">✕</button><img style="width:100%;border-radius:10px;max-height:240px;object-fit:cover;margin-bottom:11px" id="gm-img" src="" alt=""><div style="font-size:13px;font-weight:700" id="gm-date"></div><div style="font-size:18px;margin-top:3px" id="gm-mood"></div></div></div>
+
+<script>
+// ═══ STORAGE ═══
+function ls(k,d=null){try{const v=localStorage.getItem(k);return v!==null?JSON.parse(v):d}catch{return d}}
+function ss(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+function openModal(id){document.getElementById(id).classList.add('on')}
+function closeModal(id){document.getElementById(id).classList.remove('on')}
+function qk(t){return document.querySelector('[data-t='+t+']')}
+
+// ═══ SETUP ═══
+let setupColor='rose';
+function toggleRole(btn){btn.classList.toggle('on');const c={rose:'#C5606A',plum:'#7A4F82',teal:'#2D7A8A',sage:'#3D7A60',navy:'#2C4A7A'}[setupColor]||'#C5606A';btn.style.background=btn.classList.contains('on')?c:'';btn.style.color=btn.classList.contains('on')?'#fff':''}
+function pickSetupColor(el){setupColor=el.dataset.c;document.querySelectorAll('.cp').forEach(c=>c.classList.remove('on'));el.classList.add('on');document.documentElement.setAttribute('data-color',setupColor)}
+function completeSetup(){
+  const name=document.getElementById('su-name').value.trim();
+  if(!name){alert('Please enter your name ✦');return}
+  const planner=document.getElementById('su-planner').value.trim()||'Lumina';
+  const roles=[...document.querySelectorAll('.role-btn.on')].map(b=>b.textContent.trim());
+  const verse=document.getElementById('su-verse').value.trim();
+  ss('lumina_setup',{name,planner,roles,color:setupColor,verse,ts:Date.now()});
+  initApp();
+}
+function initApp(){
+  const setup=ls('lumina_setup');
+  if(!setup){document.getElementById('setup-screen').style.display='flex';return}
+  document.getElementById('setup-screen').style.display='none';
+  document.getElementById('main-app').style.display='flex';
+  // Apply saved config
+  document.getElementById('app-logo').textContent='✦ '+setup.planner;
+  document.getElementById('app-username').textContent=setup.name;
+  document.getElementById('app-roles').textContent=setup.roles.length?setup.roles.join(' · '):'My Planner';
+  document.getElementById('greet-name').textContent=setup.name.split(' ')[0];
+  document.getElementById('planner-sub').textContent='Show up for yourself today, '+setup.name.split(' ')[0]+' ✦';
+  document.title='Lumina · '+setup.name;
+  const c=setup.color||'rose';
+  document.documentElement.setAttribute('data-color',c);
+  ss('color',c);
+  // Update colour swatches active state
+  document.querySelectorAll('.cswatch').forEach(s=>{const cols={rose:'#C5606A',plum:'#7A4F82',teal:'#2D7A8A',sage:'#3D7A60',navy:'#2C4A7A'};s.classList.toggle('on',cols[c]&&s.style.background===cols[c]||false)});
+  // Personal verse
+  if(setup.verse){document.getElementById('hv-txt').textContent=setup.verse;document.getElementById('hv-ref').textContent='— Your word for the year'}
+  bootApp();
+}
+
+// ═══ BOOT ═══
+const MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const D=new Date();
+function bootApp(){
+  const hr=D.getHours();
+  document.getElementById('greet-time').textContent=hr<12?'morning':hr<17?'afternoon':'evening';
+  document.getElementById('home-sub').textContent=DN[D.getDay()]+', '+MN[D.getMonth()]+' '+D.getDate()+', '+D.getFullYear();
+  document.getElementById('hdr-date').textContent=DN[D.getDay()]+', '+MN[D.getMonth()]+' '+D.getDate();
+  document.getElementById('prayer-ttl').textContent=MN[D.getMonth()]+' '+D.getFullYear()+' Prayer Journal';
+  document.getElementById('r-sub').textContent='Books · Bible · Data — '+MN[D.getMonth()]+' '+D.getFullYear();
+  // Day buttons
+  const dr=document.getElementById('day-btns');dr.innerHTML='';
+  ['S','M','T','W','T','F','S'].forEach((l,i)=>{const b=document.createElement('button');b.style.cssText='width:26px;height:26px;border-radius:50%;border:1px solid var(--bd);background:none;font-size:10px;font-weight:700;cursor:pointer;color:var(--t3);font-family:Plus Jakarta Sans,sans-serif';if(i===D.getDay()){b.style.background='var(--a)';b.style.color='#fff';b.style.borderColor='var(--a)'}b.textContent=l;dr.appendChild(b)});
+  // Streak
+  const sk=ls('streak',{last:'',count:0});const ts=D.toDateString();let sc=sk.count;
+  if(sk.last!==ts){const y=new Date(D);y.setDate(y.getDate()-1);sc=sk.last===y.toDateString()?sk.count+1:1;ss('streak',{last:ts,count:sc})}
+  document.getElementById('streak-n').textContent=sc;document.getElementById('home-sk').textContent=sc;
+  // Dark
+  if(ls('dark',false)){document.documentElement.setAttribute('data-theme','dark');document.getElementById('dark-btn').textContent='☀️'}
+  // Colour swatches
+  const savedC=ls('color','rose');document.documentElement.setAttribute('data-color',savedC);
+  // Populate sidebar labels
+  const sbun=document.getElementById('sb-username');if(sbun)sbun.textContent=setup?.name||'';
+  const sbpn=document.getElementById('sb-planner-name');if(sbpn)sbpn.textContent=setup?.planner||'Lumina';
+  // Daily content
+  const VERSES=[{t:"I can do all things through Christ who strengthens me.",r:"Philippians 4:13"},{t:"For I know the plans I have for you, declares the Lord — plans to prosper you.",r:"Jeremiah 29:11"},{t:"She is clothed with strength and dignity; she can laugh at the days to come.",r:"Proverbs 31:25"},{t:"Trust in the Lord with all your heart and lean not on your own understanding.",r:"Proverbs 3:5"},{t:"Those who hope in the Lord will renew their strength. They will soar on wings like eagles.",r:"Isaiah 40:31"},{t:"The Lord is my shepherd; I shall not want.",r:"Psalm 23:1"},{t:"Be strong and courageous. Do not be afraid; the Lord your God is with you.",r:"Joshua 1:9"},{t:"Commit to the Lord whatever you do, and he will establish your plans.",r:"Proverbs 16:3"},{t:"In all things God works for the good of those who love him.",r:"Romans 8:28"},{t:"Now to him who is able to do immeasurably more than all we ask or imagine.",r:"Ephesians 3:20"},{t:"She perceived that her merchandise was profitable. Her lamp does not go out at night.",r:"Proverbs 31:18"},{t:"For we are God's handiwork, created in Christ Jesus to do good works.",r:"Ephesians 2:10"},{t:"The heart of the discerning acquires knowledge, for the ears of the wise seek it out.",r:"Proverbs 18:15"},{t:"Weeping may stay for the night, but rejoicing comes in the morning.",r:"Psalm 30:5"}];
+  const QUOTES=[{t:"The secret of getting ahead is getting started.",a:"Mark Twain"},{t:"You are braver than you believe, stronger than you seem, and smarter than you think.",a:"A.A. Milne"},{t:"Data is the new oil — and you are learning to drill.",a:"Unknown"},{t:"Every nurse was drawn to nursing because of a desire to care, to serve, or to help.",a:"Christina Feist-Heilmeier"},{t:"She believed she could, so she did.",a:"R.S. Grey"},{t:"Success is not final, failure is not fatal: it is the courage to continue that counts.",a:"Winston Churchill"},{t:"The future belongs to those who believe in the beauty of their dreams.",a:"Eleanor Roosevelt"},{t:"In nursing, compassion is not optional — it is the foundation of excellence.",a:"Unknown"},{t:"Your only limit is your mind.",a:"Unknown"},{t:"Done is better than perfect.",a:"Sheryl Sandberg"}];
+  const vi=D.getDay()%VERSES.length;const qi=D.getDay()%QUOTES.length;
+  // Only override verse if setup verse not set
+  const setup=ls('lumina_setup');
+  if(!setup?.verse){document.getElementById('hv-txt').textContent=VERSES[vi].t;document.getElementById('hv-ref').textContent='— '+VERSES[vi].r}
+  document.getElementById('hq-txt').textContent=QUOTES[qi].t;document.getElementById('hq-au').textContent='— '+QUOTES[qi].a;
+  // Init all sections
+  renderTasks();if(!ls('tasks_m',null)){ss('tasks_m',[{text:'Morning prayer & devotion',done:false,tag:'s'},{text:'Gratitude journal',done:false,tag:'e'}]);ss('tasks_a',[{text:'Review clinical notes / CPD',done:false,tag:'n'},{text:'30 min Python / SQL study',done:false,tag:'d'}]);ss('tasks_e',[{text:'Evening reflection',done:false,tag:'s'}]);renderTasks()}
+  initHabits();renderGoals();renderDSGoals();renderBooks();renderGallery();renderLessons();renderPrayers();renderAff();renderAffList();renderVision();renderShifts();renderHealth();renderFinGoals();renderNotes();renderCountdowns();
+  document.getElementById('wk-lbl').textContent=getWkLabel(0);
+  document.getElementById('rev-lbl').textContent=getRevLabel(0);
+  loadReview();
+  const sc2=ls('scripture','');if(sc2)document.getElementById('scripture').value=sc2;
+  const dsl=ls('ds_log','');if(dsl)document.getElementById('ds-log').value=dsl;
+  const shd=document.getElementById('sh-date');if(shd)shd.value=D.toISOString().split('T')[0];
+}
+// Boot or show setup
+if(ls('lumina_setup')){initApp()}else{document.getElementById('setup-screen').style.display='flex';document.getElementById('main-app').style.display='none'}
+
+// ═══ UTILS ═══
+function openSidebar(){document.getElementById('sidebar').classList.add('open');document.getElementById('sidebar-overlay').classList.add('on')}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebar-overlay').classList.remove('on')}
+function sw(t,btn){document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.snb').forEach(b=>b.classList.remove('on'));document.getElementById('p-'+t).classList.add('on');btn.classList.add('on')}
+function toggleDark(){const dk=document.documentElement.getAttribute('data-theme')==='dark';document.documentElement.setAttribute('data-theme',dk?'light':'dark');const icon=dk?'🌙':'☀️';document.getElementById('dark-btn').textContent=icon;document.getElementById('dark-btn-sb').textContent=icon+' '+(dk?'Dark':'Light');ss('dark',!dk)}
+function setColor(c,el){document.documentElement.setAttribute('data-color',c);ss('color',c);document.querySelectorAll('.cswatch').forEach(s=>s.classList.remove('on'));el.classList.add('on')}
+
+// ═══ EXPORT / IMPORT ═══
+const EXPORT_KEYS=['lumina_setup','tasks_m','tasks_a','tasks_e','j_entries','gwall','goals','ds_goals','ds_log','books','gallery_items','mood_log','water_today','sleep_log','habits','notes','lessons','prayers','scripture','affirmations','aff_idx','vision_items','shifts','fin_goals','countdowns','rev_entries','color','dark'];
+function getAllData(){const data={};EXPORT_KEYS.forEach(k=>{try{const v=localStorage.getItem(k);if(v!==null)data[k]=JSON.parse(v)}catch(e){data[k]=localStorage.getItem(k)}});// Also grab any habit_ keys and rev_ keys
+Object.keys(localStorage).forEach(k=>{if(k.startsWith('habit_')||k.startsWith('rev_')){try{data[k]=JSON.parse(localStorage.getItem(k))}catch(e){data[k]=localStorage.getItem(k)}}});return data}
+function exportJSON(){const data=getAllData();const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='lumina-backup-'+new Date().toISOString().split('T')[0]+'.json';a.click();URL.revokeObjectURL(a.href)}
+function exportCSV(){const data=getAllData();const rows=[['Section','Key','Value']];Object.entries(data).forEach(([k,v])=>{const section=k.startsWith('tasks')?'Planner':k.startsWith('j_')||k==='gwall'?'Journal':k.startsWith('goals')||k.startsWith('ds_')?'Goals':k==='books'?'Reading':k==='notes'?'Notes':k==='lessons'?'Lessons':k==='prayers'?'Prayer':k.startsWith('aff')?'Affirmations':k==='vision_items'?'Vision':k==='shifts'?'Shifts':k.startsWith('fin')?'Finance':k==='countdowns'?'Countdowns':k.startsWith('rev_')?'Review':k.startsWith('habit_')||k==='habits'?'Habits':'Settings';const val=typeof v==='object'?JSON.stringify(v):String(v);rows.push([section,k,'"'+val.replace(/"/g,'""')+'"'])});const csv=rows.map(r=>r.join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='lumina-export-'+new Date().toISOString().split('T')[0]+'.csv';a.click();URL.revokeObjectURL(a.href)}
+function importJSON(evt){const file=evt.target.files[0];if(!file)return;if(!confirm('This will restore your backup and replace current data. Continue?'))return;const r=new FileReader();r.onload=e=>{try{const data=JSON.parse(e.target.result);Object.entries(data).forEach(([k,v])=>{localStorage.setItem(k,JSON.stringify(v))});alert('Backup restored ✦ Reloading…');location.reload()}catch(err){alert('Invalid backup file. Please use a Lumina JSON backup.')}};r.readAsText(file);evt.target.value=''}
+
+// ═══ TASKS ═══
+const TM={s:{cls:'tg-s',tx:'✝'},e:{cls:'tg-e',tx:'💜'},c:{cls:'tg-c',tx:'🚀'},n:{cls:'tg-n',tx:'🏥'},d:{cls:'tg-d',tx:'📊'},p:{cls:'tg-p',tx:'🌿'}};
+function renderTasks(){
+  [{k:'m',id:'tm'},{k:'a',id:'ta'},{k:'e',id:'te'}].forEach(({k,id})=>{
+    const tasks=ls('tasks_'+k,[]);const c=document.getElementById(id);c.innerHTML='';
+    tasks.forEach((t,i)=>{const el=document.createElement('div');el.className='task'+(t.done?' done':'');const tm=TM[t.tag]||TM.p;el.innerHTML=`<div class="chk">${t.done?'✓':''}</div><span class="ttx">${t.text}</span><span class="tg ${tm.cls}">${tm.tx}</span><button onclick="event.stopPropagation();delTask('${k}',${i})" style="font-size:9px;color:var(--coral);border:none;background:none;cursor:pointer;padding:1px 4px;font-weight:700">✕</button>`;el.onclick=()=>{t.done=!t.done;ss('tasks_'+k,tasks);renderTasks()};c.appendChild(el)});
+  });updateStats();
+}
+function delTask(k,i){const t=ls('tasks_'+k,[]);t.splice(i,1);ss('tasks_'+k,t);renderTasks()}
+function addTask(e,cId,selId){if(e.key!=='Enter')return;const inp=e.target,val=inp.value.trim();if(!val)return;const k=cId==='tm'?'m':cId==='ta'?'a':'e';const tasks=ls('tasks_'+k,[]);tasks.push({text:val,done:false,tag:document.getElementById(selId).value});ss('tasks_'+k,tasks);inp.value='';renderTasks()}
+function updateStats(){let done=0,tot=0;['m','a','e'].forEach(k=>{const ts=ls('tasks_'+k,[]);tot+=ts.length;done+=ts.filter(t=>t.done).length});document.getElementById('st-done').textContent=done;document.getElementById('st-tot').textContent=tot;document.getElementById('st-pct').textContent=tot?Math.round(done/tot*100)+'%':'0%';document.getElementById('home-td').textContent=done+' task'+(done!==1?'s':'')+' done'}
+
+// ═══ HABITS ═══
+const hCats=['s','s','e','e','n','d','h','h','c'];
+const hPre=[[1,1,1,1,0,1,0],[1,1,1,1,1,1,1],[1,0,1,1,0,1,0],[1,1,0,1,0,0,0],[1,0,1,0,1,0,0],[1,1,1,0,1,1,0],[1,0,1,1,0,1,1],[1,1,0,1,1,0,0],[1,1,0,1,0,0,1]];
+function initHabits(){hCats.forEach((_,i)=>{const c=document.getElementById('hd'+i);if(!c)return;const saved=ls('habit_'+i,hPre[i]);['M','T','W','T','F','S','S'].forEach((dl,di)=>{const dot=document.createElement('div');const cat=hCats[i];dot.className='hdot'+(saved[di]?' '+cat:'');dot.textContent=dl;dot.onclick=()=>{saved[di]=saved[di]?0:1;ss('habit_'+i,saved);dot.className='hdot'+(saved[di]?' '+cat:'');dot.textContent=dl};c.appendChild(dot)})})}
+
+// ═══ JOURNAL ═══
+let curMood={emoji:'',label:''};let curJT='Emotional';
+function pickMood(btn,e,l){document.querySelectorAll('.mb').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');curMood={emoji:e,label:l}}
+function setJT(btn,type,prompt){document.querySelectorAll('#jtype-row .jtb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');curJT=type;document.getElementById('j-prompt').textContent=prompt}
+function swJ(btn,pane){btn.closest('.pane').querySelectorAll('.jtb').forEach(b=>{if(b.parentElement===btn.parentElement)b.classList.remove('on')});btn.classList.add('on');['jw','jp','jg'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none'});document.getElementById(pane).style.display='block';if(pane==='jp')renderEntries();if(pane==='jg')renderGwall()}
+function saveEntry(){const txt=document.getElementById('j-text').value.trim();if(!txt){alert('Write something first 💜');return}const e=ls('j_entries',[]);e.unshift({date:DN[D.getDay()]+', '+MN[D.getMonth()]+' '+D.getDate()+' '+D.getFullYear(),type:curJT,mood:curMood,text:txt,ts:Date.now()});ss('j_entries',e);document.getElementById('j-text').value='';// Save mood for health chart
+const moodVal={Struggling:1,Neutral:2,Good:3,Great:4,Grateful:5}[curMood.label]||3;const moodLog=ls('mood_log',[]);moodLog.unshift({date:D.toDateString(),val:moodVal,ts:Date.now()});ss('mood_log',moodLog.slice(0,30));alert('Entry saved ✦')}
+function renderEntries(filter=''){const entries=ls('j_entries',[]);const list=document.getElementById('j-list');list.innerHTML='';const f=filter?entries.filter(e=>e.text.toLowerCase().includes(filter.toLowerCase())||e.type.toLowerCase().includes(filter.toLowerCase())):entries;if(!f.length){list.innerHTML='<div style="font-size:12px;color:var(--t3);padding:16px 0;text-align:center">No entries found ✦</div>';return}const tcm={Emotional:'tg-e',Spiritual:'tg-s',Career:'tg-c',Nursing:'tg-n',Data:'tg-d',General:'tg-p'};f.forEach((e,i)=>{const ri=entries.indexOf(e);const card=document.createElement('div');card.className='ecard';card.innerHTML=`<div class="emeta"><span>${e.date}</span>${e.mood.emoji?`<span>${e.mood.emoji} ${e.mood.label}</span>`:''}<span class="tg ${tcm[e.type]||'tg-p'}">${e.type}</span></div><div class="eprev">${e.text.substring(0,160)}${e.text.length>160?'…':''}</div><div style="margin-top:7px"><button style="font-size:10px;color:var(--coral);cursor:pointer;font-weight:700;padding:2px 7px;border-radius:5px;background:var(--cl);border:none" onclick="delEntry(${ri})">Delete</button></div>`;list.appendChild(card)})}
+function delEntry(i){if(!confirm('Delete this entry?'))return;const e=ls('j_entries',[]);e.splice(i,1);ss('j_entries',e);renderEntries()}
+function saveGwall(){const txt=document.getElementById('gw-txt').value.trim();if(!txt)return;const emoji=document.getElementById('gw-emoji').value;const items=ls('gwall',[]);items.unshift({emoji,text:txt,date:MN[D.getMonth()]+' '+D.getDate()+', '+D.getFullYear(),ts:Date.now()});ss('gwall',items);document.getElementById('gw-txt').value='';renderGwall()}
+function renderGwall(){const grid=document.getElementById('gwall-grid');grid.innerHTML='';const items=ls('gwall',[]);if(!items.length){grid.innerHTML='<div style="font-size:12px;color:var(--t3);padding:14px 0;grid-column:1/-1">Pin your first gratitude moment above ✦</div>';return}const cols=['al','pl','sl','gl','tl','cl'];items.forEach((item,i)=>{const div=document.createElement('div');div.className='gwitem';div.style.background='var(--'+cols[i%cols.length]+')';div.innerHTML=`<button class="gwdel" onclick="delGwall(${i})">✕</button><div style="font-size:22px;margin-bottom:7px">${item.emoji}</div><div style="font-size:12px;line-height:1.6;color:var(--t2)">${item.text}</div><div style="font-size:10px;color:var(--t3);margin-top:6px;font-weight:600">${item.date}</div>`;grid.appendChild(div)})}
+function delGwall(i){const items=ls('gwall',[]);items.splice(i,1);ss('gwall',items);renderGwall()}
+
+// ═══ GOALS ═══
+const GCfg={spiritual:{i:'🙏',c:'var(--plum)',b:'var(--pl)',l:'✝ Spiritual'},emotional:{i:'🌸',c:'var(--a)',b:'var(--al)',l:'💜 Emotional'},career:{i:'💼',c:'var(--sage)',b:'var(--sl)',l:'🚀 Career'},nursing:{i:'👩‍⚕️',c:'var(--coral)',b:'var(--cl)',l:'🏥 Nursing'},data:{i:'📊',c:'var(--navy)',b:'var(--nl)',l:'📊 Data Science'},personal:{i:'🌿',c:'var(--gold)',b:'var(--gl)',l:'🌿 Personal'}};
+function defGoals(){return[{cat:'spiritual',title:'Deepen my faith walk',desc:'Read the entire New Testament by December and build a consistent prayer life.',progress:42,deadline:'Dec 2026',milestones:[{text:'Matthew — Mark',done:true},{text:'Luke — John',done:true},{text:'Acts — Romans',done:false},{text:'30-day prayer streak',done:false}]},{cat:'emotional',title:'Build inner peace & confidence',desc:'30 days of consistent journaling and setting healthy boundaries.',progress:67,deadline:'Ongoing',milestones:[{text:'Start journaling daily',done:true},{text:'Identify emotional triggers',done:true},{text:'Complete 30-day streak',done:false}]},{cat:'nursing',title:'Advance my nursing career',desc:'Complete specialist certification and lead a quality improvement project.',progress:35,deadline:'Q4 2026',milestones:[{text:'Register for specialist course',done:true},{text:'Complete CPD hours',done:false},{text:'Lead QI project',done:false}]}]}
+function renderGoals(){const goals=ls('goals',defGoals());const list=document.getElementById('goals-list');list.innerHTML='';goals.forEach((g,gi)=>{const cfg=GCfg[g.cat]||GCfg.personal;const pct=Math.min(100,Math.max(0,g.progress||0));const card=document.createElement('div');card.className='gcard';const msH=(g.milestones||[]).map((ms,mi)=>`<div class="ms${ms.done?' dn':''}"><div class="mschk${ms.done?' on':''}" style="${ms.done?'background:'+cfg.c+';border-color:'+cfg.c:''}" onclick="toggleGMs(${gi},${mi})">${ms.done?'✓':''}</div><span class="mstx">${ms.text}</span></div>`).join('');card.innerHTML=`<button class="cdel" onclick="delGoal(${gi})">✕</button><div class="fbw"><div class="badge" style="background:${cfg.b};color:${cfg.c}">${cfg.l}</div><span style="font-size:16px">${cfg.i}</span></div><input class="ein" value="${g.title}" placeholder="Goal title" style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:700;margin-top:4px" onchange="updG(${gi},'title',this.value)"><textarea class="ein" style="resize:none;height:45px;font-size:11px;color:var(--t2)" onchange="updG(${gi},'desc',this.value)">${g.desc||''}</textarea><div style="display:flex;align-items:center;gap:7px;margin-bottom:7px"><span style="font-size:10px;font-weight:700;color:var(--t3)">Progress:</span><input type="number" value="${pct}" min="0" max="100" style="width:52px;padding:3px 6px;border:1px solid var(--b2);border-radius:5px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;color:${cfg.c};background:var(--s2);outline:none" onchange="updGProg(${gi},+this.value)"><span style="font-size:10px;color:var(--t3)">%</span><input class="ein" value="${g.deadline||''}" placeholder="Deadline" style="flex:1;font-size:11px;margin:0;padding:3px 7px" onchange="updG(${gi},'deadline',this.value)"></div><div class="prog"><div class="progf" style="width:${pct}%;background:${cfg.c}" id="gpf-${gi}"></div></div><div class="pm2"><span>${pct}%</span><span>${g.deadline||''}</span></div><div style="margin-top:9px">${msH}</div><input class="ein" placeholder="+ Add milestone (Enter)" style="margin-top:6px;font-size:11px" onkeydown="addGMs(event,${gi})">`;list.appendChild(card)})}
+function openGoalModal(){openModal('goal-modal')}
+function saveGoal(){const title=document.getElementById('gm-t').value.trim();if(!title){alert('Enter a title');return}const ms=document.getElementById('gm-m').value.split('\n').filter(l=>l.trim()).map(l=>({text:l.trim(),done:false}));const goals=ls('goals',defGoals());goals.push({cat:document.getElementById('gm-c').value,title,desc:document.getElementById('gm-d').value.trim(),progress:+document.getElementById('gm-p').value||0,deadline:document.getElementById('gm-dl').value.trim(),milestones:ms});ss('goals',goals);closeModal('goal-modal');renderGoals()}
+function delGoal(i){if(!confirm('Delete this goal?'))return;const g=ls('goals',defGoals());g.splice(i,1);ss('goals',g);renderGoals()}
+function updG(i,f,v){const g=ls('goals',defGoals());g[i][f]=v;ss('goals',g)}
+function updGProg(i,v){const g=ls('goals',defGoals());g[i].progress=v;ss('goals',g);const pf=document.getElementById('gpf-'+i);if(pf)pf.style.width=v+'%'}
+function toggleGMs(gi,mi){const g=ls('goals',defGoals());g[gi].milestones[mi].done=!g[gi].milestones[mi].done;ss('goals',g);renderGoals()}
+function addGMs(e,gi){if(e.key!=='Enter')return;const val=e.target.value.trim();if(!val)return;const g=ls('goals',defGoals());g[gi].milestones.push({text:val,done:false});ss('goals',g);e.target.value='';renderGoals()}
+
+// ═══ DATA SCIENCE ═══
+function defDS(){return[{area:'Python & Analytics',title:'Master Python for Healthcare Data',desc:'Build Python foundations for clinical data analysis.',skills:['Python','Pandas','NumPy','Matplotlib'],progress:45,deadline:'Q2 2026',milestones:[{text:'Python basics',done:true},{text:'Pandas data wrangling',done:true},{text:'Visualisations',done:false},{text:'First healthcare analysis',done:false}]},{area:'Machine Learning',title:'Build ML Models for Clinical Use',desc:'Predictive models for patient outcomes and disease risk.',skills:['Scikit-learn','Logistic Regression','AUC-ROC'],progress:20,deadline:'Q3 2026',milestones:[{text:'Supervised vs unsupervised',done:true},{text:'Patient readmission model',done:false},{text:'Kaggle healthcare challenge',done:false}]},{area:'Portfolio',title:'Healthcare Data Portfolio',desc:'3 end-to-end projects showcasing clinical data science.',skills:['GitHub','Jupyter'],progress:5,deadline:'Q4 2026',milestones:[{text:'Project 1: EDA',done:false},{text:'Project 2: Prediction model',done:false},{text:'Project 3: Dashboard',done:false}]}]}
+function renderDSGoals(){const goals=ls('ds_goals',defDS());const list=document.getElementById('ds-goals-list');list.innerHTML='';goals.forEach((g,gi)=>{const pct=Math.min(100,Math.max(0,g.progress||0));const card=document.createElement('div');card.className='gcard';const chips=(g.skills||[]).map(s=>`<span style="display:inline-flex;font-size:10px;padding:2px 7px;border-radius:5px;background:var(--nl);color:var(--navy);font-weight:700;margin:2px">${s}</span>`).join('');const msH=(g.milestones||[]).map((ms,mi)=>`<div class="ms${ms.done?' dn':''}"><div class="mschk${ms.done?' on':''}" style="${ms.done?'background:var(--navy);border-color:var(--navy)':''}" onclick="toggleDSMs(${gi},${mi})">${ms.done?'✓':''}</div><span class="mstx">${ms.text}</span></div>`).join('');card.innerHTML=`<button class="cdel" onclick="delDSGoal(${gi})">✕</button><div class="fbw"><div class="badge" style="background:var(--nl);color:var(--navy)">${g.area||'Data Science'}</div></div><input class="ein" value="${g.title}" style="font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:700;margin-top:4px;border-color:var(--nl)" onchange="updDS(${gi},'title',this.value)"><textarea class="ein" style="resize:none;height:42px;font-size:11px;color:var(--t2);border-color:var(--nl)" onchange="updDS(${gi},'desc',this.value)">${g.desc||''}</textarea><div style="margin-bottom:9px">${chips}</div><div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><span style="font-size:10px;font-weight:700;color:var(--t3)">Progress:</span><input type="number" value="${pct}" min="0" max="100" style="width:52px;padding:3px 6px;border:1px solid var(--b2);border-radius:5px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;color:var(--navy);background:var(--s2);outline:none" onchange="updDSProg(${gi},+this.value)"><span style="font-size:10px;color:var(--t3)">%</span><input class="ein" value="${g.deadline||''}" placeholder="Deadline" style="flex:1;font-size:11px;margin:0;padding:3px 7px;border-color:var(--nl)" onchange="updDS(${gi},'deadline',this.value)"></div><div class="prog"><div class="progf" style="width:${pct}%;background:var(--navy)" id="dspf-${gi}"></div></div><div style="margin-top:9px">${msH}</div><input class="ein" placeholder="+ Add milestone (Enter)" style="margin-top:6px;font-size:11px;border-color:var(--nl)" onkeydown="addDSMs(event,${gi})">`;list.appendChild(card)})}
+function saveDSGoal(){const title=document.getElementById('dm-t').value.trim();if(!title){alert('Enter a title');return}const ms=document.getElementById('dm-m').value.split('\n').filter(l=>l.trim()).map(l=>({text:l.trim(),done:false}));const skills=document.getElementById('dm-s').value.split(',').map(s=>s.trim()).filter(Boolean);const goals=ls('ds_goals',defDS());goals.push({area:document.getElementById('dm-a').value,title,desc:document.getElementById('dm-d').value.trim(),skills,progress:0,deadline:document.getElementById('dm-dl').value.trim(),milestones:ms});ss('ds_goals',goals);closeModal('ds-modal');renderDSGoals()}
+function delDSGoal(i){if(!confirm('Delete?'))return;const g=ls('ds_goals',defDS());g.splice(i,1);ss('ds_goals',g);renderDSGoals()}
+function updDS(i,f,v){const g=ls('ds_goals',defDS());g[i][f]=v;ss('ds_goals',g)}
+function updDSProg(i,v){const g=ls('ds_goals',defDS());g[i].progress=v;ss('ds_goals',g);const pf=document.getElementById('dspf-'+i);if(pf)pf.style.width=v+'%'}
+function toggleDSMs(gi,mi){const g=ls('ds_goals',defDS());g[gi].milestones[mi].done=!g[gi].milestones[mi].done;ss('ds_goals',g);renderDSGoals()}
+function addDSMs(e,gi){if(e.key!=='Enter')return;const val=e.target.value.trim();if(!val)return;const g=ls('ds_goals',defDS());g[gi].milestones.push({text:val,done:false});ss('ds_goals',g);e.target.value='';renderDSGoals()}
+
+// ═══ READING ═══
+const BTC={bible:{l:'✝ Bible',b:'var(--pl)',c:'var(--plum)',sp:'var(--plum),var(--a)'},data:{l:'📊 Data Science',b:'var(--nl)',c:'var(--navy)',sp:'var(--navy),var(--teal)'},growth:{l:'🌱 Personal Growth',b:'var(--sl)',c:'var(--sage)',sp:'var(--sage),var(--gold)'},nursing:{l:'🏥 Nursing',b:'var(--cl)',c:'var(--coral)',sp:'var(--coral),var(--gold)'},fiction:{l:'📖 Fiction',b:'var(--gl)',c:'var(--gold)',sp:'var(--gold),var(--a)'},other:{l:'📘 Other',b:'var(--tl)',c:'var(--teal)',sp:'var(--teal),var(--navy)'}};
+let covImgData='';
+function defBooks(){return[{title:'The Book of John',author:'New Testament',type:'bible',current:12,total:21,cover:'',notes:''},{title:'Python for Data Analysis',author:'Wes McKinney',type:'data',current:120,total:480,cover:'',notes:''},{title:'Atomic Habits',author:'James Clear',type:'growth',current:180,total:320,cover:'',notes:''}]}
+function renderBooks(){const books=ls('books',defBooks());const c=document.getElementById('books-container');c.innerHTML='';books.forEach((book,i)=>{const cfg=BTC[book.type]||BTC.other;const pct=book.total>0?Math.round(book.current/book.total*100):0;const card=document.createElement('div');card.className='bcard';card.innerHTML=`<div class="bspine" style="background:linear-gradient(90deg,${cfg.sp})"></div><div class="bbody"><div class="brow"><div class="bcovwrap"><div class="bcov" onclick="document.getElementById('bc-${i}').click()">${book.cover?`<img src="${book.cover}" alt="">`:book.type==='bible'?'✝':'📖'}</div><div class="bcovhint">tap to change</div><input type="file" accept="image/*" id="bc-${i}" style="display:none" onchange="changeCov(event,${i})"><button class="bdelbtn" onclick="delBook(${i})">✕</button></div><div style="flex:1"><div class="b-type" style="background:${cfg.b};color:${cfg.c};font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;display:inline-block;margin-bottom:5px">${cfg.l}</div><input style="width:100%;padding:3px 6px;border:1px solid var(--b2);border-radius:6px;font-family:'Cormorant Garamond',serif;font-size:14px;font-weight:700;color:var(--tx);background:var(--s2);outline:none;margin-bottom:3px" value="${book.title}" onchange="updBook(${i},'title',this.value)"><input style="width:100%;padding:2px 6px;border:1px solid var(--b2);border-radius:6px;font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;color:var(--t3);background:var(--s2);outline:none;margin-bottom:5px" value="${book.author}" onchange="updBook(${i},'author',this.value)"><div style="display:flex;align-items:center;gap:5px;margin-bottom:5px"><span style="font-size:10px;font-weight:700;color:var(--t3);white-space:nowrap">Page/Ch:</span><input type="number" value="${book.current}" min="0" style="width:56px;padding:2px 6px;border:1px solid var(--b2);border-radius:5px;font-size:12px;font-weight:700;color:${cfg.c};background:var(--s2);outline:none;font-family:'Plus Jakarta Sans',sans-serif" onchange="updBook(${i},'current',+this.value);refreshProg(${i})"><span style="font-size:11px;color:var(--t3)">/</span><input type="number" value="${book.total}" min="1" style="width:56px;padding:2px 6px;border:1px solid var(--b2);border-radius:5px;font-size:12px;color:var(--t3);background:var(--s2);outline:none;font-family:'Plus Jakarta Sans',sans-serif" onchange="updBook(${i},'total',+this.value);refreshProg(${i})"></div><div class="plbl"><span>Progress</span><span id="bpct-${i}" style="color:${cfg.c};font-weight:700">${pct}%</span></div><div class="prog"><div class="progf" style="width:${pct}%;background:${cfg.c}" id="bpf-${i}"></div></div></div></div><textarea class="rin" onchange="updBook(${i},'notes',this.value)" placeholder="Notes, reflections…">${book.notes||''}</textarea></div>`;c.appendChild(card)})}
+function prevCover(evt){const f=evt.target.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{covImgData=e.target.result;const p=document.getElementById('cov-prev');p.src=covImgData;p.style.display='block'};r.readAsDataURL(f)}
+function saveBook(){const title=document.getElementById('bm-t').value.trim();if(!title){alert('Enter a title');return}const books=ls('books',defBooks());books.push({title,author:document.getElementById('bm-a').value.trim(),type:document.getElementById('bm-tp').value,current:+document.getElementById('bm-c').value||0,total:+document.getElementById('bm-tot').value||100,cover:covImgData,notes:document.getElementById('bm-n').value.trim()});ss('books',books);closeModal('book-modal');covImgData='';renderBooks()}
+function updBook(i,f,v){const books=ls('books',defBooks());if(!books[i])return;books[i][f]=v;ss('books',books)}
+function refreshProg(i){const books=ls('books',defBooks());const b=books[i];if(!b)return;const pct=b.total>0?Math.round(b.current/b.total*100):0;const pf=document.getElementById('bpf-'+i);const pc=document.getElementById('bpct-'+i);if(pf)pf.style.width=pct+'%';if(pc)pc.textContent=pct+'%'}
+function delBook(i){if(!confirm('Remove?'))return;const books=ls('books',defBooks());books.splice(i,1);ss('books',books);renderBooks()}
+function changeCov(evt,i){const f=evt.target.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{updBook(i,'cover',e.target.result);renderBooks()};r.readAsDataURL(f)}
+
+// ═══ GALLERY ═══
+let galItems=ls('gallery_items',[]);
+function renderGallery(){const grid=document.getElementById('gal-grid');grid.innerHTML='';galItems.forEach((item,i)=>{const div=document.createElement('div');div.className='gitem';div.innerHTML=`<img src="${item.src}" alt=""><div class="gdate">${item.date}</div><div class="gmood">${item.mood||''}</div><button class="gdel" onclick="event.stopPropagation();delPhoto(${i})">✕</button>`;div.onclick=()=>{document.getElementById('gm-img').src=item.src;document.getElementById('gm-date').textContent=item.date;document.getElementById('gm-mood').textContent=item.mood||'';openModal('gal-modal')};grid.appendChild(div)});const ul=document.createElement('label');ul.className='gupload';ul.innerHTML='<input type="file" accept="image/*" multiple onchange="handlePhotos(event)"><div style="font-size:22px">📷</div><div style="font-size:10px;color:var(--t3);font-weight:600;text-align:center">Add photo</div>';grid.appendChild(ul)}
+function handlePhotos(evt){const files=evt.target.files;const me=curMood.emoji||(ls('j_entries',[])[0]?.mood?.emoji||'');let n=0;Array.from(files).forEach(f=>{const r=new FileReader();r.onload=e=>{galItems.unshift({src:e.target.result,date:DN[D.getDay()]+', '+MN[D.getMonth()]+' '+D.getDate()+' '+D.getFullYear(),mood:me});n++;if(n===files.length){ss('gallery_items',galItems);renderGallery()}};r.readAsDataURL(f)})}
+function delPhoto(i){galItems.splice(i,1);ss('gallery_items',galItems);renderGallery()}
+
+// ═══ HEALTH ═══
+function renderHealth(){
+  // Water
+  const wc=document.getElementById('water-btns');wc.innerHTML='';const wv=ls('water_today',{date:D.toDateString(),count:0});const todayW=wv.date===D.toDateString()?wv.count:0;
+  for(let i=0;i<8;i++){const b=document.createElement('div');b.className='wbtn'+(i<todayW?' filled':'');b.innerHTML='💧';b.onclick=()=>{const nw={date:D.toDateString(),count:i<todayW?i:i+1};ss('water_today',nw);renderHealth()};wc.appendChild(b)}
+  document.getElementById('water-lbl').textContent=todayW+' / 8 glasses';
+  // Mood chart
+  const mc=document.getElementById('mood-chart');mc.innerHTML='';const moodLog=ls('mood_log',[]);const days7=[];for(let i=6;i>=0;i--){const d2=new Date(D);d2.setDate(d2.getDate()-i);days7.push(d2.toDateString())}
+  const moodColors=['var(--nl)','var(--gl)','var(--sl)','var(--al)','var(--pl)'];
+  days7.forEach((ds,i)=>{const entry=moodLog.find(m=>m.date===ds);const val=entry?entry.val:0;const bar=document.createElement('div');bar.className='mcb';bar.style.background=val?moodColors[val-1]:'var(--s2)';bar.style.height=(val?val/5*100:5)+'%';const lbl=document.createElement('div');lbl.className='mcb-lbl';const d2=new Date(D);d2.setDate(d2.getDate()-(6-i));lbl.textContent=['S','M','T','W','T','F','S'][d2.getDay()];bar.appendChild(lbl);mc.appendChild(bar)});
+  // Sleep log
+  const sl=document.getElementById('sleep-list');sl.innerHTML='';const sleepLog=ls('sleep_log',[]).slice(0,7);if(!sleepLog.length){sl.innerHTML='<div style="font-size:12px;color:var(--t3);padding:8px 0">No sleep data yet ✦</div>';return}sleepLog.forEach(s=>{const div=document.createElement('div');div.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd);font-size:12px';div.innerHTML=`<span style="color:var(--t3);font-weight:600">${s.date}</span><span style="font-weight:700;color:var(--sky)">${s.hours}h</span><span style="color:var(--t3)">${s.quality}</span>`;sl.appendChild(div)})}
+function logSleep(){const hrs=document.getElementById('sleep-in').value;if(!hrs){alert('Enter hours');return}const qual=document.getElementById('sleep-qual').options[document.getElementById('sleep-qual').selectedIndex].text;const log=ls('sleep_log',[]);log.unshift({date:MN[D.getMonth()]+' '+D.getDate(),hours:+hrs,quality:qual,ts:Date.now()});ss('sleep_log',log.slice(0,30));// Update mood log with sleep quality too
+document.getElementById('sleep-in').value='';renderHealth();alert('Sleep logged ✦')}
+
+// ═══ FINANCE ═══
+function renderFinGoals(){const goals=ls('fin_goals',[]);const list=document.getElementById('fin-goals-list');list.innerHTML='';let totS=0,totT=0;goals.forEach((g,i)=>{totS+=g.saved||0;totT+=g.target||0;const pct=g.target>0?Math.round(g.saved/g.target*100):0;const div=document.createElement('div');div.className='fin-goal';div.innerHTML=`<button class="cdel" onclick="delFinGoal(${i})">✕</button><div class="fin-name">${g.name}</div><div class="fin-meta">${g.cur}${(g.saved||0).toLocaleString()} / ${g.cur}${(g.target||0).toLocaleString()} · ${g.deadline||''}</div><div class="plbl"><span>Progress</span><span style="color:var(--sage);font-weight:700">${pct}%</span></div><div class="prog"><div class="progf" style="width:${pct}%;background:var(--sage)"></div></div><div style="margin-top:7px;display:flex;gap:7px"><input type="number" placeholder="Update saved amount" style="flex:1;padding:5px 8px;border:1px solid var(--b2);border-radius:7px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:var(--tx);background:var(--s2);outline:none" onchange="updFinSaved(${i},+this.value)"></div>`;list.appendChild(div)});const fmt=n=>n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?(n/1000).toFixed(0)+'K':n;document.getElementById('fin-saved').textContent='₦'+fmt(totS);document.getElementById('fin-target').textContent='₦'+fmt(totT)}
+function saveFinGoal(){const name=document.getElementById('fm-n').value.trim();if(!name){alert('Enter a goal name');return}const goals=ls('fin_goals',[]);goals.push({name,target:+document.getElementById('fm-t').value||0,saved:+document.getElementById('fm-s').value||0,cur:document.getElementById('fm-cur').value,deadline:document.getElementById('fm-dl').value.trim()});ss('fin_goals',goals);closeModal('fin-modal');renderFinGoals()}
+function delFinGoal(i){const g=ls('fin_goals',[]);g.splice(i,1);ss('fin_goals',g);renderFinGoals()}
+function updFinSaved(i,v){const g=ls('fin_goals',[]);g[i].saved=v;ss('fin_goals',g);renderFinGoals()}
+
+// ═══ NOTES ═══
+const noteColors={al:'var(--al)',pl:'var(--pl)',sl:'var(--sl)',gl:'var(--gl)',tl:'var(--tl)',nl:'var(--nl)'};
+function renderNotes(){const notes=ls('notes',[]);const grid=document.getElementById('notes-grid');grid.innerHTML='';if(!notes.length){grid.innerHTML='<div style="font-size:12px;color:var(--t3);padding:14px 0;grid-column:1/-1">No notes yet — add your first one above ✦</div>';return}notes.forEach((n,i)=>{const card=document.createElement('div');card.className='note-card';card.style.background='var(--'+n.color+')';card.innerHTML=`<button class="ndel" onclick="delNote(${i})">✕</button><div class="note-title">${n.title||'Note'}</div><div class="note-body">${n.body.substring(0,150)}${n.body.length>150?'…':''}</div><div class="note-date">${n.date}</div>`;grid.appendChild(card)})}
+function saveNote(){const body=document.getElementById('note-body-in').value.trim();if(!body){alert('Write something first');return}const notes=ls('notes',[]);notes.unshift({title:document.getElementById('note-title-in').value.trim(),body,color:document.getElementById('note-color').value,date:MN[D.getMonth()]+' '+D.getDate()+', '+D.getFullYear()});ss('notes',notes);document.getElementById('note-title-in').value='';document.getElementById('note-body-in').value='';renderNotes()}
+function delNote(i){const notes=ls('notes',[]);notes.splice(i,1);ss('notes',notes);renderNotes()}
+
+// ═══ LESSONS ═══
+let wkOff=0;
+function getWkLabel(off){const n=new Date(D);n.setDate(n.getDate()+off*7);const s=new Date(n);s.setDate(n.getDate()-n.getDay());const e=new Date(s);e.setDate(s.getDate()+6);return MN[s.getMonth()]+' '+s.getDate()+' – '+MN[e.getMonth()]+' '+e.getDate()+', '+e.getFullYear()}
+function changeWeek(dir){wkOff+=dir;document.getElementById('wk-lbl').textContent=getWkLabel(wkOff)}
+function toggleCat(btn){btn.classList.toggle('on')}
+function saveLesson(){const txt=document.getElementById('l-text').value.trim();if(!txt)return;const cats=[...document.querySelectorAll('.catbtn.on')].map(b=>b.textContent.trim());const lessons=ls('lessons',[]);lessons.unshift({week:getWkLabel(wkOff),cats,text:txt,ts:Date.now()});ss('lessons',lessons);document.getElementById('l-text').value='';renderLessons();alert('Lesson saved ✦')}
+function renderLessons(){const list=document.getElementById('lessons-list');list.innerHTML='';const lessons=ls('lessons',[]);if(!lessons.length){list.innerHTML='<div style="font-size:12px;color:var(--t3);padding:10px 0">No lessons yet ✦</div>';return}lessons.forEach((l,i)=>{const card=document.createElement('div');card.className='lcard';card.innerHTML=`<button class="cdel" onclick="delLesson(${i})">✕</button><div class="lwk">${l.week}</div>${l.cats.length?`<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:5px">${l.cats.map(c=>`<span class="tg tg-c" style="font-size:10px">${c}</span>`).join('')}</div>`:''}<div class="lbody">${l.text}</div>`;list.appendChild(card)})}
+function delLesson(i){const l=ls('lessons',[]);l.splice(i,1);ss('lessons',l);renderLessons()}
+
+// ═══ PRAYER ═══
+function renderPrayers(){const prayers=ls('prayers',[]);const list=document.getElementById('prayers-list'),ans=document.getElementById('answered-list');list.innerHTML='';ans.innerHTML='';const active=prayers.filter(p=>!p.answered),done=prayers.filter(p=>p.answered);if(!active.length)list.innerHTML='<div style="font-size:12px;color:var(--t3);padding:7px 0">No requests yet ✦</div>';active.forEach(p=>{const idx=prayers.indexOf(p);const div=document.createElement('div');div.className='pitem';div.innerHTML=`<div class="pchk" onclick="answerPrayer(${idx})"></div><div class="ptx">${p.text}</div><button class="pdel" onclick="delPrayer(${idx})">✕</button>`;list.appendChild(div)});if(!done.length)ans.innerHTML='<div style="font-size:12px;color:var(--t3);padding:7px 0">Answered prayers appear here ✦</div>';done.forEach(p=>{const div=document.createElement('div');div.className='pitem';div.innerHTML=`<div class="pchk on">✓</div><div class="ptx">${p.text}</div><span style="font-size:10px;color:var(--plum);font-weight:700;white-space:nowrap">Answered ✦</span>`;ans.appendChild(div)})}
+function addPrayer(){const val=document.getElementById('pr-in').value.trim();if(!val)return;const prayers=ls('prayers',[]);prayers.push({text:val,answered:false});ss('prayers',prayers);document.getElementById('pr-in').value='';renderPrayers()}
+function answerPrayer(i){const prayers=ls('prayers',[]);prayers[i].answered=true;ss('prayers',prayers);renderPrayers()}
+function delPrayer(i){const prayers=ls('prayers',[]);prayers.splice(i,1);ss('prayers',prayers);renderPrayers()}
+
+// ═══ AFFIRMATIONS ═══
+const defAffs=['I am capable of achieving everything I set my mind to.','I choose growth, I walk in purpose, and I trust the process.','I am resilient — every challenge makes me stronger.','I have everything I need to create the life I desire.','I am worthy of success, love, and all good things.','Today I show up as my best self and that is enough.','I attract opportunities, abundance, and positive energy.','I am becoming a better version of myself every single day.'];
+let affIdx=ls('aff_idx',0);
+function renderAff(){const affs=ls('affirmations',defAffs);if(!affs.length)return;affIdx=affIdx%affs.length;document.getElementById('daff-txt').textContent=affs[affIdx]}
+function nextAff(){const affs=ls('affirmations',defAffs);affIdx=(affIdx+1)%affs.length;ss('aff_idx',affIdx);renderAff()}
+function saveAff(){const txt=document.getElementById('aff-in').value.trim();if(!txt)return;const affs=ls('affirmations',defAffs);affs.push(txt);ss('affirmations',affs);document.getElementById('aff-in').value='';renderAffList();alert('Affirmation added ✦')}
+function renderAffList(){const affs=ls('affirmations',defAffs);const list=document.getElementById('aff-list');list.innerHTML='';affs.forEach((a,i)=>{const card=document.createElement('div');card.className='affcard';card.innerHTML=`<div class="affnum">${i+1}.</div><div class="afftx">${a}</div><button class="affdel" onclick="delAff(${i})">✕</button>`;list.appendChild(card)})}
+function delAff(i){const affs=ls('affirmations',defAffs);affs.splice(i,1);ss('affirmations',affs);renderAffList();renderAff()}
+
+// ═══ VISION ═══
+let pendVision='';
+function renderVision(){const grid=document.getElementById('vision-grid');grid.innerHTML='';const items=ls('vision_items',[]);items.forEach((item,i)=>{const div=document.createElement('div');div.className='vitem';div.innerHTML=`<img src="${item.src}" alt=""><div class="vcap">${item.caption||''}</div><button class="vdel" onclick="event.stopPropagation();delVision(${i})">✕</button>`;grid.appendChild(div)});const ul=document.createElement('label');ul.className='vupload';ul.innerHTML='<input type="file" accept="image/*" multiple onchange="handleVision(event)"><div style="font-size:22px">🌟</div><div style="font-size:10px;color:var(--t3);font-weight:600;text-align:center">Add vision</div>';grid.appendChild(ul)}
+function handleVision(evt){Array.from(evt.target.files).forEach(f=>{const r=new FileReader();r.onload=e=>{pendVision=e.target.result;document.getElementById('vm-img').src=pendVision;document.getElementById('vm-cap').value='';openModal('vision-modal')};r.readAsDataURL(f)})}
+function saveVision(){const items=ls('vision_items',[]);items.unshift({src:pendVision,caption:document.getElementById('vm-cap').value.trim()});ss('vision_items',items);closeModal('vision-modal');renderVision()}
+function delVision(i){const items=ls('vision_items',[]);items.splice(i,1);ss('vision_items',items);renderVision()}
+
+// ═══ SHIFTS ═══
+function renderShifts(){const shifts=ls('shifts',[]);const list=document.getElementById('shifts-list');list.innerHTML='';document.getElementById('sh-count').textContent=shifts.length;document.getElementById('sh-hours').textContent=shifts.reduce((a,s)=>a+(+s.hours||0),0);document.getElementById('sh-month').textContent=shifts.filter(s=>{try{const sd=new Date(s.date);return sd.getMonth()===D.getMonth()&&sd.getFullYear()===D.getFullYear()}catch{return false}}).length;if(!shifts.length){list.innerHTML='<div style="font-size:12px;color:var(--t3);padding:9px 0">No shifts logged yet ✦</div>';return}shifts.forEach((s,i)=>{const card=document.createElement('div');card.className='scard';card.innerHTML=`<button class="cdel" onclick="delShift(${i})">✕</button><div class="sward">${s.ward||'Ward'}</div><div class="smeta">${s.date||''} · ${s.type||''} · ${s.hours||0} hrs</div><div class="snotes">${s.notes||''}</div>`;list.appendChild(card)})}
+function logShift(){const ward=document.getElementById('sh-ward').value.trim();const date=document.getElementById('sh-date').value;if(!ward||!date){alert('Enter ward and date');return}const shifts=ls('shifts',[]);shifts.unshift({ward,date,type:document.getElementById('sh-type').value,hours:+document.getElementById('sh-hrs').value||0,notes:document.getElementById('sh-notes').value.trim()});ss('shifts',shifts);['sh-ward','sh-notes'].forEach(id=>document.getElementById(id).value='');document.getElementById('sh-hrs').value='';renderShifts();alert('Shift logged ✦')}
+function delShift(i){const s=ls('shifts',[]);s.splice(i,1);ss('shifts',s);renderShifts()}
+
+// ═══ REVIEW ═══
+let revOff=0;
+function getRevLabel(off){const n=new Date(D.getFullYear(),D.getMonth()+off,1);return MN[n.getMonth()]+' '+n.getFullYear()}
+function changeMonth(dir){revOff+=dir;document.getElementById('rev-lbl').textContent=getRevLabel(revOff);loadReview()}
+function loadReview(){const key='rev_'+getRevLabel(revOff).replace(' ','_');const data=ls(key,{});[['wins','rv-wins'],['str','rv-str'],['les','rv-les'],['int','rv-int']].forEach(([f,id])=>{const el=document.getElementById(id);if(el)el.value=data[f]||''})}
+function saveRv(field){const key='rev_'+getRevLabel(revOff).replace(' ','_');const data=ls(key,{});const ids={wins:'rv-wins',str:'rv-str',les:'rv-les',int:'rv-int'};data[field]=document.getElementById(ids[field]).value;ss(key,data);alert('Saved ✦')}
+
+// ═══ COUNTDOWNS ═══
+function renderCountdowns(){const cds=ls('countdowns',[]);const list=document.getElementById('cd-list-home');list.innerHTML='';if(!cds.length){list.innerHTML='<div style="font-size:12px;color:var(--t3);padding:6px 0">No countdowns yet ✦</div>';return}cds.forEach((cd,i)=>{const diff=Math.ceil((new Date(cd.date)-D)/(1000*60*60*24));const card=document.createElement('div');card.className='cdcard';card.style.marginBottom='8px';card.innerHTML=`<button class="cdel" onclick="delCd(${i})" style="background:var(--al)">✕</button><div class="cdnum">${diff>0?diff:0}</div><div class="cdlbl">${cd.name}</div><div class="cddate">${diff>0?'days away':'Today / Past'} · ${cd.date}</div>`;list.appendChild(card)})}
+function saveCountdown(){const name=document.getElementById('cd-n').value.trim();const date=document.getElementById('cd-d').value;if(!name||!date){alert('Enter name and date');return}const cds=ls('countdowns',[]);cds.push({name,date});ss('countdowns',cds);closeModal('cd-modal');document.getElementById('cd-n').value='';document.getElementById('cd-d').value='';renderCountdowns()}
+function delCd(i){const cds=ls('countdowns',[]);cds.splice(i,1);ss('countdowns',cds);renderCountdowns()}
+</script>
+</body>
+</html>
